@@ -8,14 +8,21 @@
     "dev": "nodemon server.js",
     "import-data": "node import-csv.js"
   },
-  "keywords": ["laminations", "database", "mysql", "express", "industrial"],
+  "keywords": [
+    "laminations",
+    "database",
+    "mysql",
+    "express",
+    "industrial"
+  ],
   "author": "Tatokitaa <psimontirado@gmail.com>",
   "license": "UNLICENSED",
   "dependencies": {
-    "express": "^4.18.2",
-    "mysql2": "^3.6.0",
     "cors": "^2.8.5",
-    "csv-parser": "^3.0.0"
+    "csv-parser": "^3.2.0",
+    "express": "^4.18.2",
+    "iconv-lite": "^0.6.3",
+    "mysql2": "^3.6.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

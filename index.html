@@ -46,6 +46,7 @@
                 <button id="search-btn">Buscar</button>
                 <button id="clear-btn">Limpiar</button>
                 <button id="production-btn">Registrar Producción</button>
+                <button id="new-lamination-btn">Nueva Laminación</button>
             </div>
         </div>
 
@@ -81,7 +82,7 @@
 
         <!-- Modal para detalles -->
         <div id="detail-modal" class="modal">
-            <div class="modal-content">
+            <div class="modal-content large-modal">
                 <span class="close">&times;</span>
                 <h2>Detalles de Laminación</h2>
                 <div id="detail-content">
@@ -111,7 +112,7 @@
                         <input type="number" id="production-kilos" step="0.01" min="0" required>
                     </div>
                     <div class="form-group">
-                        <label for="production-alambres">Cantidad de Alambres:</label>
+                        <label for="production-alambres">Cantidad de Alambres (unidades):</label>
                         <input type="number" id="production-alambres" min="0">
                     </div>
                     <div class="form-group">
@@ -125,6 +126,290 @@
                     <div class="form-buttons">
                         <button type="submit">Registrar Producción</button>
                         <button type="button" id="cancel-production">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal Nueva Laminación -->
+        <div id="new-lamination-modal" class="modal">
+            <div class="modal-content large-modal">
+                <span class="close close-new-lamination">&times;</span>
+                <h2>Nueva Laminación</h2>
+                <form id="new-lamination-form">
+                    <!-- Información Básica -->
+                    <div class="form-section">
+                        <h3>Información Básica</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-empresa">Empresa: *</label>
+                                <select id="new-empresa" required>
+                                    <option value="">Seleccionar empresa</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="new-numero-parte">Número de Parte: *</label>
+                                <input type="text" id="new-numero-parte" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-descripcion-cliente">Descripción del Cliente:</label>
+                                <input type="text" id="new-descripcion-cliente">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-nivel-revision">Nivel de Revisión:</label>
+                                <input type="text" id="new-nivel-revision">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-laminacion-vcl">Laminación VCL:</label>
+                                <input type="text" id="new-laminacion-vcl">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-referencia">Referencia:</label>
+                                <input type="text" id="new-referencia">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información de Troquel -->
+                    <div class="form-section">
+                        <h3>Información de Troquel</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-troquel">Troquel:</label>
+                                <input type="text" id="new-troquel">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-paso-troquel">Paso Troquel (mm):</label>
+                                <input type="number" id="new-paso-troquel" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información de Prensas -->
+                    <div class="form-section">
+                        <h3>Configuración de Prensas</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-prensa-1">Prensa 1:</label>
+                                <input type="text" id="new-prensa-1">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-placas-paralelas">Placas/Paralelas:</label>
+                                <input type="text" id="new-placas-paralelas">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-stackers">Stackers:</label>
+                                <input type="text" id="new-stackers">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-bandas">Bandas:</label>
+                                <input type="text" id="new-bandas">
+                            </div>
+                        </div>
+                        
+                        <!-- Prensa 2 -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-prensa-2">Prensa 2:</label>
+                                <input type="text" id="new-prensa-2">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-placas-paralelas-2">Placas/Paralelas 2:</label>
+                                <input type="text" id="new-placas-paralelas-2">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-stackers-2">Stackers 2:</label>
+                                <input type="text" id="new-stackers-2">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-bandas-2">Bandas 2:</label>
+                                <input type="text" id="new-bandas-2">
+                            </div>
+                        </div>
+                        
+                        <!-- Prensa 3 -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-prensa-3">Prensa 3:</label>
+                                <input type="text" id="new-prensa-3">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-placas-paralelas-3">Placas/Paralelas 3:</label>
+                                <input type="text" id="new-placas-paralelas-3">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-stackers-3">Stackers 3:</label>
+                                <input type="text" id="new-stackers-3">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-bandas-3">Bandas 3:</label>
+                                <input type="text" id="new-bandas-3">
+                            </div>
+                        </div>
+                        
+                        <!-- Prensa 4 -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-prensa-4">Prensa 4:</label>
+                                <input type="text" id="new-prensa-4">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-placas-paralelas-4">Placas/Paralelas 4:</label>
+                                <input type="text" id="new-placas-paralelas-4">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-stackers-4">Stackers 4:</label>
+                                <input type="text" id="new-stackers-4">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-bandas-4">Bandas 4:</label>
+                                <input type="text" id="new-bandas-4">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información de Material -->
+                    <div class="form-section">
+                        <h3>Especificaciones de Material</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-acero-1">Acero 1:</label>
+                                <input type="text" id="new-acero-1">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-acero-2">Acero 2:</label>
+                                <input type="text" id="new-acero-2">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-acero-3">Acero 3:</label>
+                                <input type="text" id="new-acero-3">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-horneado">Horneado:</label>
+                                <input type="text" id="new-horneado">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dimensiones -->
+                    <div class="form-section">
+                        <h3>Dimensiones y Pesos</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-espesor-pulg">Espesor (pulg.):</label>
+                                <input type="number" id="new-espesor-pulg" step="0.000001">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-ancho-cinta">Ancho Cinta (pulg.):</label>
+                                <input type="number" id="new-ancho-cinta" step="0.001">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-peso-pieza">Peso por Pieza (kg):</label>
+                                <input type="number" id="new-peso-pieza" step="0.000001">
+                            </div>
+                            <div class="form-group">
+                                <!-- Campo movido a sección de alambre -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información de Alambre (Unidad de Agrupación) -->
+                    <div class="form-section">
+                        <h3>Configuración de Alambre (Unidad de Agrupación)</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-long-corte-alambre">Long. Corte de Alambre:</label>
+                                <input type="number" id="new-long-corte-alambre" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-cal-alambre">Calibre de Alambre:</label>
+                                <input type="text" id="new-cal-alambre">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-tipo-alambre">Tipo de Alambre:</label>
+                                <input type="text" id="new-tipo-alambre">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-lubricante">Lubricante:</label>
+                                <input type="text" id="new-lubricante">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-long-alambre-stack">Long. Alambre/Stack Final (pulg.):</label>
+                                <input type="number" id="new-long-alambre-stack" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-piezas-alambre">Piezas por Alambre (unidad):</label>
+                                <input type="number" id="new-piezas-alambre">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-peso-alambre">Peso de un Alambre (kg):</label>
+                                <input type="number" id="new-peso-alambre" step="0.000001">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-alambres-caja">Alambres por Caja:</label>
+                                <input type="number" id="new-alambres-caja">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información de Empaque y Distribución -->
+                    <div class="form-section">
+                        <h3>Información de Empaque y Distribución</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-tamano-caja">Tamaño de Caja:</label>
+                                <input type="text" id="new-tamano-caja">
+                            </div>
+                            <div class="form-group">
+                                <!-- Campo movido a sección de alambre -->
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="new-tamano-tarima">Tamaño de Tarima:</label>
+                                <input type="text" id="new-tamano-tarima">
+                            </div>
+                            <div class="form-group">
+                                <label for="new-tipo-tarima">Tipo de Tarima:</label>
+                                <input type="text" id="new-tipo-tarima">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Características Especiales -->
+                    <div class="form-section">
+                        <h3>Características Especiales</h3>
+                        <div class="form-group full-width">
+                            <label for="new-caracteristica-especial">Característica Especial:</label>
+                            <textarea id="new-caracteristica-especial" rows="3"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="submit">Crear Laminación</button>
+                        <button type="button" id="cancel-new-lamination">Cancelar</button>
                     </div>
                 </form>
             </div>

@@ -1,0 +1,5 @@
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+N°,N° de Parte,Descripción del Cliente,Nivel de revisión,Laminación VCL,Referencia,Troquel,Paso troquel (mm),Prensa 1,Placas / Paralelas ,Stacker's,Bandas,Prensa 2,Placas / Paralelas 2,Stacker's 2,Bandas 2,Prensa 3,Placas / Paralelas 3,Stacker's 3,Bandas3,Prensa 4,Placas / Paralelas 4,Stacker's 4,Bandas 4,Long. Corte de alambre,Cal. de alambre,Tipo de alambre ,Lubricante,Horneado,Acero 1,Acero 2,Acero 3,Espesor (pulg.),Ancho de cinta (pulg.),Peso pieza (kg),Long. Alambre / stack  final (pulg.),Piezas por alambre,Peso del alambre (kg),Tamaño de caja (L*A*P),Alambres / Stack's por caja,Tamaño de tarima (L*A),Tipo de tarima,Característica especial
+1,A1541,1/2 EI LAMINATION,,EI 5060 24,,EI-50,,Minster 30,,,,,,,,,,,,,,18,,44,18,Recocido,Tech Cool 10-1,Si,65M470,,,0.0256,53.2,,18.5,722.6563,,,,,,GPM 160
+2,A1541,1/2 EI LAMINATION,,EI 5060 24,,EI-50,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,#DIV/0!,,,,,,
+30,B1239,E LAMINATION ASSEMBLY (),,ILOCK 24 3P,,,,Pulsar-B,,,,Pulsar-A,Placas 11,,,,,,,,,18,,,,,Tech Cool 10-1,,65M470,,,,,,18.5,#DIV/0!,,,,,,

@@ -1,0 +1,40 @@
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+N°,N° de Parte,Descripción del Cliente,Nivel de revisión,Laminación VCL,Referencia,Troquel,Paso troquel (mm),Prensa 1,Placas / Paralelas ,Stacker's,Bandas,Prensa 2,Placas / Paralelas 2,Stacker's 2,Bandas 2,Prensa 3,Placas / Paralelas 3,Stacker's 3,Bandas3,Prensa 4,Placas / Paralelas 4,Stacker's 4,Bandas 4,Long. Corte de alambre,Cal. de alambre,Tipo de alambre ,Lubricante,Horneado,Acero 1,Acero 2,Acero 3,Espesor (pulg.),Ancho de cinta (pulg.),Peso pieza (kg),Long. Alambre / stack  final (pulg.),Piezas por alambre,Peso del alambre (kg),Tamaño de caja (L*A*P),Alambres / Stack's por caja,Tamaño de tarima (L*A),Tipo de tarima,Característica especial
+1,32385-2,STRIP LAMINATION,,32385-2,,N/A,N/A,CTL-A,N/A,N/A,N/A,CTL-B,N/A,N/A,N/A,,,,,,,,,,,,Evaporativo,No,M6,,,0.0138,2.750,0.0261,2,145,3.78,,,,,
+2,32386-4,STRIP LAMINATON ,,32386-4,,N/A,N/A,CTL-A,N/A,N/A,N/A,CTL-B,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,12,18,Cocido,Evaporativo,No,35M145,N/A,N/A,0.0138,2.750,0.0537,2,145,7.79,,,,,
+3,33663-5M3,LAMINATION ,,33663-5M3,,N/A,N/A,CTL-A,N/A,N/A,N/A,CTL-B,N/A,N/A,N/A,,,,,,,,,12,18,Cocido,,No,B23P100,,,0.0091,1.750,0.0146,2,220,3.21,,,,,
+4,33662-0Z3,26GA M3,,33662-0Z3,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,0.0094,,#DIV/0!,#DIV/0!,,,,,
+5,32351-3,LAMINATION ,,32351-3,,N/A,N/A,CTL-A,N/A,N/A,N/A,CTL-B,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,12,18,Recocido,Evaporativo,No,M6,,,0.0138,0.75,0.005,2,145,0.73,,,,,
+6,32352-5,,,32352-5,,N/A,N/A,CTL-A,N/A,N/A,N/A,CTL-B,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Evaporativo,No,35M06,,,0.0138,,0.0072,2,145,1.04,,,,,
+7,35353-7,,,35353-7,,N/A,N/A,CTL-A,N/A,N/A,,CTL-B,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,,,M6,,,0.0138,1.5,0.0045,4,290,1.31,,,,,
+8,35331-8,LAMINATION CUSTOM,,LAM-35331-8 4X8.5,,N/A,N/A,CTL-A,N/A,N/A,N/A,CTL-B,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Evaporativo,No,M6,N/A,N/A,0.0138,4,0.0587,2,145,8.51,,,,,
+9,35330-4,LAMINATION CUSTOM,,LAM-35330-4 4X13.5,,N/A,N/A,CTL-A,N/A,N/A,N/A,CTL-B,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Evaporativo,No,M6,N/A,N/A,0.0138,4,0.0933,2,145,13.53,,,,,
+10,35249-5,LAMINATION CUSTOM,,LAM-35249-5 4X7.0,,N/A,N/A,CTL-A,N/A,N/A,N/A,CTL-B,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Evaporativo,No,M6,N/A,N/A,0.0138,4,0.0483,2,145,7.00,,,,,
+11,35248-6,LAMINATION CUSTOM,,LAM-35248-6 4X10.5,,N/A,N/A,CTL-A,N/A,N/A,N/A,CTL-B,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Evaporativo,No,M6,35M145,N/A,0.0138,4,0.0725,2,145,10.51,,,,,
+12,,,,EI 100 4HO 26 0.218,,EI-100B,89,Pulsar-B,N/A,EI-100B,N/A,Pulsar-A,,,,,,,,,,,,27,18,Recocido,Evaporativo,Si,50M470,,,0.0197,3,0.011,9.25,470,5.17,,,,,
+13,,,,EI 100 4HO 26 0.218,,EI-100B,89,Pulsar-B,N/A,EI-100B,N/A,Pulsar-A,,,,,,,,,,,,27,18,Recocido,Evaporativo,Si,50M470,,,0.0197,3,0.0035,9.25,470,1.65,,,,,GPM 170/200
+14,,,,EI-175-4HO-26 0.281,,EI-175,155.5,Bliss,N/A,EI-175,N/A,P-150B,Placas 4,EI-175,N/A,,,,,,,,,31,18,Cocido,Tech cool 10-1,Si,50M470,50M400,,0.0197,5.248,0.0338,9.25,470,15.89,,,,,
+15,,,,EI-175-4HO-26 0.281,,EI-175,155.5,Bliss,N/A,EI-175,N/A,P-150B,Placas 4,EI-175,N/A,,,,,,,,,31,18,Cocido,Tech cool 10-1,Si,50M470,50M400,,0.0197,5.248,0.0111,9.25,470,5.22,,,,,
+16,,,,EI-175-4HO-29 0.281,,EI-175,155.5,Bliss,N/A,EI-175,N/A,P-150B,Placas 4,EI-175,N/A,,,,,,,,,32,18,Cocido,Evaporativo,Si,M6,,,0.0138,5.248,0.0226,9.25,671,15.16,,,,,
+17,,,,EI-175-4HO-29 0.281,,EI-175,155.5,Bliss,N/A,EI-175,N/A,P-150B,Placas 4,EI-175,N/A,,,,,,,,,32,18,Cocido,Evaporativo,Si,M6,,,0.0138,5.248,0.0076,9.25,671,5.10,,,,,
+18,,,,EI-212-4HO-26-0.328,,EI-212,215.8,Bliss,N/A,EI-212,N/A,Minster 100,N/A,,,,,,,,,,,25,18,Recocido,Tech cool 10-1,Si,50M470,50M800,,0.0197,6.375,0.05,4.625,235,11.75,,,,,
+19,,,,EI-212-4HO-26-0.328,,EI-212,215.8,Bliss,N/A,EI-212,N/A,Minster 100,N/A,,,,,,,,,,,25,18,Recocido,Tech cool 10-1,Si,50M470,50M800,,0.0197,6.375,0.0165,4.625,235,3.88,,,,,
+20,31344-5,EI-212H4 (MODIFIED) 26M50 LAMINATION,,EI-212-STD-H4,,EI-212,215.8,Bliss,N/A,EI-212,N/A,Minster 100,N/A,,,,,,,,,,,,,,,,,,,0.0197,6.375,,4.625,235,0.00,,,,,
+21,31344-5,EI-212H4 (MODIFIED) 26M50 LAMINATION,,EI-212-STD-H4,,EI-212,215.8,Bliss,N/A,EI-212,N/A,Minster 100,N/A,,,,,,,,,,,,,,,,,,,0.0197,6.375,,4.625,235,0.00,,,,,
+22,,EI-212H4 (MODIFIED) 26M50 LAMINATION,,EI 212 4HOG 0.320 26,,EI-212,215.8,Bliss,N/A,EI-212,N/A,Minster 100,N/A,,,,,,,,,,,24,18,Cocido,Tech cool 10-1,Si,50M470,50M800,,0.0197,6.375,0.0482,4.625,235,11.33,,,,,
+23,,EI-212H4 (MODIFIED) 26M50 LAMINATION,,EI 212 4HOG 0.320 26,,EI-212,215.8,Bliss,N/A,EI-212,N/A,Minster 100,N/A,,,,,,,,,,,24,18,Cocido,Tech cool 10-1,Si,50M470,50M800,,0.0197,6.375,0.0163,4.625,235,3.83,,,,,
+24,31344-5,EI-212H4 (MODIFIED) 26M50 LAMINATION,,EI-212-0.50-H4,,EI-212,215.8,Bliss,N/A,EI-212,N/A,Minster 100,N/A,,,,,,,,,,,,,,,,,,,0.0197,6.375,,4.625,235,0.00,,,,,
+25,31344-5,EI-212H4 (MODIFIED) 26M50 LAMINATION,,EI-212-0.50-H4,,EI-212,215.8,Bliss,N/A,EI-212,N/A,Minster 100,N/A,,,,,,,,,,,,,,,,,,,0.0197,6.375,,4.625,235,0.00,,,,,
+26,31344-5,EI-212H4 (MODIFIED) 26M50 LAMINATION,,EI-212-STD-H6,,EI-212,215.8,Bliss,N/A,EI-212,N/A,Minster 100,N/A,,,,,,,,,,,,,,,,,,,0.0197,6.375,,4.625,235,0.00,,,,,
+27,31344-5,EI-212H4 (MODIFIED) 26M50 LAMINATION,,EI-212-STD-H6,,EI-212,215.8,Bliss,N/A,EI-212,N/A,Minster 100,N/A,,,,,,,,,,,,,,,,,,,0.0197,6.375,,4.625,235,0.00,,,,,
+28,31344-5,EI-212H4 (MODIFIED) 26M50 LAMINATION,,EI-212-0.32-H6,,EI-212,215.8,Bliss,N/A,EI-212,N/A,Minster 100,N/A,,,,,,,,,,,,,,,,,,,0.0197,6.375,,4.625,235,0.00,,,,,
+29,31344-5,EI-212H4 (MODIFIED) 26M50 LAMINATION,,EI-212-0.32-H6,,EI-212,215.8,Bliss,N/A,EI-212,N/A,Minster 100,N/A,,,,,,,,,,,,,,,,,,,0.0197,6.375,,4.625,235,0.00,,,,,
+30,31344-5,EI-212H4 (MODIFIED) 26M50 LAMINATION,,EI-212-0.50-H6,,EI-212,215.8,Bliss,N/A,EI-212,N/A,Minster 100,N/A,,,,,,,,,,,,,,,,,,,0.0197,6.375,,4.625,235,0.00,,,,,
+31,31344-5,EI-212H4 (MODIFIED) 26M50 LAMINATION,,EI-212-0.50-H6,,EI-212,215.8,Bliss,N/A,EI-212,N/A,Minster 100,N/A,,,,,,,,,,,,,,,,,,,0.0197,6.375,,4.625,235,0.00,,,,,GPM 25
+33,35500-3, LAMINATION 29 GA M6,,35500-3,,N/A,N/A,CTL-A,,,,CTL-B,,,,,,,,,,,,,,,Evaporativo,No,35M145,,,0.0138,3.75,,3,218,0.00,,,,,GPM 25
+34,35501-9, LAMINATION 29 GA M6,,35501-9,,N/A,N/A,CTL-A,,,,CTL-B,,,,,,,,,,,,,,,Evaporativo,No,35M145,,,0.0138,3.75,,3,218,0.00,,,,,GPM 25
+35,35516-2, LAMINATION 29 GA M6,,35516-2,,N/A,N/A,CTL-A,,,,CTL-B,,,,,,,,,,,,,,,Evaporativo,No,35M145,,,0.0138,3.75,,3,218,0.00,,,,,GPM 25
+32,35517-8, LAMINATION 29 GA M6,,35518-8,,N/A,N/A,CTL-A,,,,CTL-B,,,,,,,,,,,,,,,Evaporativo,No,35M145,,,0.0138,3.75,,3,218,0.00,,,,,GPM 25
+36,35524-4, LAMINATION 29 GA M6,,35524-4,,N/A,N/A,CTL-A,,,,CTL-B,,,,,,,,,,,,,,,Evaporativo,No,35M145,,,0.0138,3.75,,3,218,0.00,,,,,GPM 25
+36,07293-4,,,EI 300 4RH 0.375 26,,N/A,N/A,CTL-A,,,,CTL-B,,,,,,,,,,,,,,,Evaporativo,No,35M145,,,0.0138,3.75,,3,218,0.00,,,,,GPM 25
+36,07293-4,,,EI 300 4RH 0.375 26,,N/A,N/A,CTL-A,,,,CTL-B,,,,,,,,,,,,,,,Evaporativo,No,35M145,,,0.0138,3.75,,3,218,0.00,,,,,GPM 25

@@ -1,0 +1,20 @@
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+N°,N° de Parte,Descripción del Cliente,Nivel de revisión,Laminación VCL,Referencia,Troquel,Paso troquel (mm),Prensa 1,Placas / Paralelas ,Stacker's,Bandas,Prensa 2,Placas / Paralelas 2,Stacker's 2,Bandas 2,Prensa 3,Placas / Paralelas 3,Stacker's 3,Bandas3,Prensa 4,Placas / Paralelas 4,Stacker's 4,Bandas 4,Long. Corte de alambre,Cal. de alambre,Tipo de alambre ,Lubricante,Horneado,Acero 1,Acero 2,Acero 3,Espesor (pulg.),Ancho de cinta (pulg.),Peso pieza (kg),Long. Alambre / stack  final (pulg.),Piezas por alambre,Peso del alambre (kg),Tamaño de caja (L*A*P),Alambres / Stack's por caja,Tamaño de tarima (L*A),Tipo de tarima,Característica especial
+1,531-1161,"LAMINATION-1"" H 26GA. M50",,EI 100 4HO 26 Ø0.218,,EI-100,EI-100B,Pulsar A,N/A,EI-100B,N/A,Pulsar B,N/A,EI-100B,N/A,,,,,,,,,,18,Cocido,Evaporativo,Si,50M470,,,0.0197,3.000,,9.25,,,,,,,
+2,531-1161,"LAMINATION-1"" H 26GA. M50",,EI 100 4HO 26 Ø0.218,,EI-100,EI-100B,Pulsar A,N/A,EI-100B,N/A,Pulsar B,N/A,EI-100B,N/A,,,,,,,,,,18,Cocido,Evaporativo,Si,50M470,,,0.0197,3.000,,9.25,,,,,,,
+3,531-1232,"LAMINATION-1-1/8"" 26GA. M50",,EI 112 4HO 26 0.218,,EI-112,EI-125,111.1,Aida,Placas 2,EI-125,N/A,P-150B,Placas 4,EI-125,N/A,P-150A,Placas 4,EI-125,N/A,Minster 30,,,,18,,Tech cool 10-1,Si,50M470,,,,,,9.25,,,,,,,
+4,531-1232,"LAMINATION-1-1/8"" 26GA. M50",,EI 112 4HO 26 0.218,,EI-1.125,EI-125,111.1,Aida,Placas 2,EI-125,N/A,P-150B,Placas 4,EI-125,N/A,P-150A,Placas 4,EI-125,N/A,Minster 30,,,,,,,,50M470,,,,,,,,,,,,,
+5,531-1261,"LAMINATION-1 1/4"" H 26GA. M50",,EI 125 4HO 26 0.218,,EI-125,EI-125,111.1,Aida,Placas 2,EI-125,N/A,P-150B,Placas 4,EI-125,N/A,P-150A,Placas 4,EI-125,N/A,Minster 30,,,,18,,Tech cool 10-1,Si,50M470,,,,,,9.25,,,,,,,
+6,531-1261,"LAMINATION-1 1/4"" H 26GA. M50",,EI 125 4HO 26 0.218,,EI-125,EI-125,111.1,Aida,Placas 2,EI-125,N/A,P-150B,Placas 4,EI-125,N/A,P-150A,Placas 4,EI-125,N/A,Minster 30,,,,,,,,50M470,,,,,,,,,,,,,
+7,531-1357,"LAMINATION-1 1/2"" H 26GA, M50",,EI 150 4HO 26 0.218,,EI-150,,Aida,Placas 2,EI-150,N/A,Bliss,,EI-150,,,,,,,,,,24,18,Cocido,Tech cool 10-1,Si,50M470,,,0.0197,4.5,,6.25,,,,,,,GPM 162/170
+8,531-1357,"LAMINATION-1 1/2"" H 26GA, M50",,EI 150 4HO 26 0.218,,EI-150,,Aida,Placas 2,EI-150,N/A,Bliss,,EI-150,,,,,,,,,,24,18,Cocido,Tech cool 10-1,Si,50M470,,,0.0197,4.5,,6.25,,,,,,,GPM 162/170
+9,,,,EI 150 4HO 29 0.218,,EI-150,,Aida,Placas 2,EI-150,N/A,Bliss,,EI-150,,,,,,,,,,24,18,Cocido,Tech cool 10-1,,35M145,,,,,,,,,,,,,
+10,,,,EI 150 4HO 29 0.218,,EI-150,,Aida,Placas 2,EI-150,N/A,Bliss,,EI-150,,,,,,,,,,24,18,Cocido,Tech cool 10-1,,35M145,,,,,,,,,,,,,
+11,531-1430,"LAMINATION-1 3/4"" H 26GA. M50",,EI 175 4HO 26 0.281,,EI-175,,P-150B,,,,Bliss,N/A,EI-175,N/A,P-150A,Placas 4,EI-175,N/A,,,,,,18,,Tech cool 10-1,Si,50M470,,,0.0197,,,9.25,,,,,,,GPM 140
+12,531-1430,"LAMINATION-1 3/4"" H 26GA. M50",,EI 175 4HO 26 0.281,,EI-175,,P-150B,,,,Bliss,N/A,EI-175,N/A,P-150A,Placas 4,EI-175,N/A,,,,,,18,,Tech cool 10-1,Si,50M470,,,0.0197,,,9.25,,,,,,,GPM 140
+13,531-1511,"LAMINATION-2 1/8"" H 26GA. M50",,EI 212 4HO 26 0.328,,EI-212,,Bliss,,,,,,,,,,,,,,,,,18,,Tech cool 10-1,Si,50M470,,,,,,4.625,,,,,,,
+14,531-1511,"LAMINATION-2 1/8"" H 26GA. M50",,EI 212 4HO 26 0.328,,EI-212,,,,,,,,,,,,,,,,,,,,,,,50M470,,,,,,,,,,,,,
+15,531-1528,"LAMINATION-2 1/4"" RH 26GA. M50",,EI 225 26 0.312,,EI-225,,P-150B,,,,,,,,,,,,,,,,,,,Tech cool 10-1,,50M470,,,,,,4.63,,,,,,,
+16,531-1528,"LAMINATION-2 1/4"" RH 26GA. M50",,EI 225 26 0.312,,EI-225,,P-150B,,,,,,,,,,,,,,,,,,,Tech cool 10-1,,50M470,,,,,,4.63,,,,,,,
+17,531-1570,"LAMINATION-3"" RH6 26GA. M50",,,,EI-300,,,,,,,,,,,,,,,,,,,,,,,50M470,,,,,,,,,,,,,
+18,531-1570,"LAMINATION-3"" RH6 26GA. M50",,,,EI-300,,,,,,,,,,,,,,,,,,,,,,,50M470,,,,,,,,,,,,,

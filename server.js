@@ -136,6 +136,30 @@ app.get('/api/laminaciones', (req, res) => {
     });
 });
 
+// Endpoint para obtener detalles de una laminación específica
+app.get('/api/laminaciones/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+    
+    if (!id) {
+        return res.status(400).json({ error: 'ID de laminación requerido' });
+    }
+    
+    const query = 'SELECT * FROM laminaciones WHERE id = ?';
+    
+    db.query(query, [id], (err, results) => {
+        if (err) {
+            console.error('Error obteniendo detalles de laminación:', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+        
+        if (results.length === 0) {
+            return res.status(404).json({ error: 'Laminación no encontrada' });
+        }
+        
+        res.json(results[0]);
+    });
+});
+
 // Endpoint para registrar producción
 app.post('/api/produccion', (req, res) => {
     const { empresa, numero_parte, kilos, alambres, libras, notas, fecha } = req.body;
@@ -227,6 +251,120 @@ app.get('/api/produccion', (req, res) => {
                     total,
                     totalPages: Math.ceil(total / limit)
                 }
+            });
+        });
+    });
+});
+
+// Endpoint para crear nueva laminación
+app.post('/api/laminaciones', (req, res) => {
+    const {
+        empresa,
+        numero_parte,
+        descripcion_cliente,
+        nivel_revision,
+        laminacion_vcl,
+        referencia,
+        troquel,
+        paso_troquel_mm,
+        prensa_1,
+        placas_paralelas,
+        stackers,
+        bandas,
+        prensa_2,
+        placas_paralelas_2,
+        stackers_2,
+        bandas_2,
+        prensa_3,
+        placas_paralelas_3,
+        stackers_3,
+        bandas_3,
+        prensa_4,
+        placas_paralelas_4,
+        stackers_4,
+        bandas_4,
+        long_corte_alambre,
+        cal_alambre,
+        tipo_alambre,
+        lubricante,
+        horneado,
+        acero_1,
+        acero_2,
+        acero_3,
+        espesor_pulg,
+        ancho_cinta_pulg,
+        peso_pieza_kg,
+        long_alambre_stack_final_pulg,
+        piezas_por_alambre,
+        peso_alambre_kg,
+        tamano_caja,
+        alambres_stacks_por_caja,
+        tamano_tarima,
+        tipo_tarima,
+        caracteristica_especial
+    } = req.body;
+
+    // Validaciones básicas
+    if (!empresa || !numero_parte) {
+        return res.status(400).json({ 
+            error: 'Empresa y número de parte son campos requeridos' 
+        });
+    }
+
+    // Obtener el siguiente número secuencial para la empresa
+    const getNextNumeroQuery = 'SELECT COALESCE(MAX(numero), 0) + 1 as next_numero FROM laminaciones WHERE empresa = ?';
+    
+    db.query(getNextNumeroQuery, [empresa], (err, result) => {
+        if (err) {
+            console.error('Error obteniendo siguiente número:', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+
+        const nextNumero = result[0].next_numero;
+
+        const insertQuery = `
+            INSERT INTO laminaciones (
+                empresa, numero, numero_parte, descripcion_cliente, nivel_revision,
+                laminacion_vcl, referencia, troquel, paso_troquel_mm,
+                prensa_1, placas_paralelas, stackers, bandas,
+                prensa_2, placas_paralelas_2, stackers_2, bandas_2,
+                prensa_3, placas_paralelas_3, stackers_3, bandas_3,
+                prensa_4, placas_paralelas_4, stackers_4, bandas_4,
+                long_corte_alambre, cal_alambre, tipo_alambre, lubricante, horneado,
+                acero_1, acero_2, acero_3,
+                espesor_pulg, ancho_cinta_pulg, peso_pieza_kg,
+                long_alambre_stack_final_pulg, piezas_por_alambre, peso_alambre_kg,
+                tamano_caja, alambres_stacks_por_caja, tamano_tarima, tipo_tarima,
+                caracteristica_especial, fecha_creacion, creado_por, activo
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'Sistema Web', 'S')
+        `;
+
+        const values = [
+            empresa, nextNumero, numero_parte, descripcion_cliente, nivel_revision,
+            laminacion_vcl, referencia, troquel, paso_troquel_mm,
+            prensa_1, placas_paralelas, stackers, bandas,
+            prensa_2, placas_paralelas_2, stackers_2, bandas_2,
+            prensa_3, placas_paralelas_3, stackers_3, bandas_3,
+            prensa_4, placas_paralelas_4, stackers_4, bandas_4,
+            long_corte_alambre, cal_alambre, tipo_alambre, lubricante, horneado,
+            acero_1, acero_2, acero_3,
+            espesor_pulg, ancho_cinta_pulg, peso_pieza_kg,
+            long_alambre_stack_final_pulg, piezas_por_alambre, peso_alambre_kg,
+            tamano_caja, alambres_stacks_por_caja, tamano_tarima, tipo_tarima,
+            caracteristica_especial
+        ];
+
+        db.query(insertQuery, values, (err, result) => {
+            if (err) {
+                console.error('Error insertando laminación:', err);
+                return res.status(500).json({ error: 'Error al crear laminación' });
+            }
+
+            res.status(201).json({
+                message: 'Laminación creada exitosamente',
+                id: result.insertId,
+                numero: nextNumero,
+                empresa: empresa
             });
         });
     });

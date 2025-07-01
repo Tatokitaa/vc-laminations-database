@@ -1,0 +1,10 @@
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+N°,N° de Parte,Descripción del Cliente,Nivel de revisión,Laminación VCL,Referencia,Troquel,Paso troquel (mm),Prensa 1,Placas / Paralelas ,Stacker's,Bandas,Prensa 2,Placas / Paralelas 2,Stacker's 2,Bandas 2,Prensa 3,Placas / Paralelas 3,Stacker's 3,Bandas3,Prensa 4,Placas / Paralelas 4,Stacker's 4,Bandas 4,Long. Corte de alambre,Cal. de alambre,Tipo de alambre ,Lubricante,Horneado,Acero 1,Acero 2,Acero 3,Espesor (pulg.),Ancho de cinta (pulg.),Peso pieza (kg),Long. Alambre / stack  final (pulg.),Piezas por alambre,Peso del alambre (kg),Tamaño de caja (L*A*P),Alambres / Stack's por caja,Tamaño de tarima (L*A),Tipo de tarima,Característica especial
+1,10001851596,Chapa Estator 48 4P,,EST 48 4P,,RS 48 4P MÉX,137.3,P-150A,N/A,RS 48 4P MÉX,N/A,P-200B,Placas 14,RS 48 4P MÉX,N/A,,,,,,,,,15,18,Recocido ,Tech Cool 20-1,No,50W1300,,,0.0197,5.118,0.0263,4.33,220,5.7860,,,,,
+2,10001851596,Chapa rotor 48 4P,,ROT 48 4P,,RS 48 4P MÉX,137.3,P-150A,N/A,RS 48 4P MÉX,N/A,P-200B,Placas 14,RS 48 4P MÉX,N/A,,,,,,,,,27,18,Recocido ,Tech Cool 20-1,No,50W1300,,,0.0197,5.118,0.0141,8.66,440,6.2040,,,,,
+3,10001463194,Chapa estator 24GA,,EST 56 4P,,RS 56 4P MÉX,,,,RS 56 4P MÉX,N/A,,,,,,,,,,,,,,18,,Tech Cool 20-1,No,,,,0.0256,6.181,0.051,4.33,170,8.6700,,,,,
+4,10001463194,Chapa estator 26GA,,EST 56 4P,,RS 56 4P MÉX,,,,RS 56 4P MÉX,N/A,,,,,,,,,,,,,,18,,Tech Cool 20-1,No,,,,0.0197,6.181,0.039,4.33,220,8.5800,,,,,
+5,10001666895,Chapa rotor Ø 29mm 24GA,,ROT 56 4P,,RS 56 4P MÉX,,,,RS 56 4P MÉX,N/A,,,,,,,,,,,,,,18,,Tech Cool 20-1,No,,,,0.0256,6.181,0.0226,8.66,339,7.6614,,,,,
+6,10001666895,Chapa rotor Ø 29mm 26GA,,ROT 56 4P,,RS 56 4P MÉX,,,,RS 56 4P MÉX,N/A,,,,,,,,,,,,,,18,,Tech Cool 20-1,No,,,,0.0197,6.181,0.0174,8.66,440,7.6560,,,,,
+7,10001463515,Chapa rotor Ø 21mm 24GA,,ROT 56 4P,,RS 56 4P MÉX,,,,RS 56 4P MÉX,N/A,,,,,,,,,,,,,,18,,Tech Cool 20-1,No,,,,0.0256,6.181,0.0242,8.66,339,8.2038,,,,,
+8,10001463515,Chapa rotor Ø 21mm 26GA,,ROT 56 4P,,RS 56 4P MÉX,,,,RS 56 4P MÉX,N/A,,,,,,,,,,,,,,18,,Tech Cool 20-1,No,,,,0.0197,6.181,0.0186,8.66,440,8.1840,,,,,

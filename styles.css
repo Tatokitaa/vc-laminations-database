@@ -470,7 +470,143 @@ tbody td {
     font-size: 1.1em;
 }
 
-/* Responsive */
+/* Modal de Nueva Laminación */
+.large-modal {
+    max-width: 900px !important;
+    width: 95% !important;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.form-section {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: rgba(248, 249, 250, 0.8);
+    border-radius: 10px;
+    border-left: 4px solid #3498db;
+}
+
+.form-section h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.close-new-lamination {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #aaa;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close-new-lamination:hover {
+    color: #e74c3c;
+}
+
+/* Estilos para modal de detalles */
+.detail-sections {
+    max-height: 70vh;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.detail-section {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: rgba(248, 249, 250, 0.8);
+    border-radius: 10px;
+    border-left: 4px solid #3498db;
+}
+
+.detail-section h3 {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.detail-item label {
+    font-weight: 600;
+    color: #34495e;
+    font-size: 0.9em;
+}
+
+.detail-item span {
+    color: #2c3e50;
+    font-size: 0.95em;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 6px;
+    border: 1px solid rgba(52, 152, 219, 0.2);
+    word-break: break-word;
+}
+
+.detail-full {
+    margin-top: 10px;
+}
+
+.detail-full p {
+    color: #2c3e50;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 6px;
+    border: 1px solid rgba(52, 152, 219, 0.2);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Scrollbar personalizada para detalles */
+.detail-sections::-webkit-scrollbar {
+    width: 8px;
+}
+
+.detail-sections::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.detail-sections::-webkit-scrollbar-thumb {
+    background: rgba(52, 152, 219, 0.3);
+    border-radius: 4px;
+}
+
+.detail-sections::-webkit-scrollbar-thumb:hover {
+    background: rgba(52, 152, 219, 0.5);
+}
+
+/* Estilos responsivos para detalles */
+
 @media (max-width: 768px) {
     .header-content {
         flex-direction: column;
@@ -505,6 +641,40 @@ tbody td {
     
     .form-buttons button {
         width: 100%;
+    }
+    
+    .large-modal {
+        width: 98% !important;
+        margin: 2% auto !important;
+        padding: 15px !important;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .form-section {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .detail-sections {
+        max-height: 60vh;
+    }
+    
+    .detail-section {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .detail-item span {
+        padding: 6px 10px;
+        font-size: 0.9em;
     }
 }
 
