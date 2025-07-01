@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base de Datos de Laminaciones - VC Laminations</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <img src="logo.jpg" alt="VC Laminations Logo" class="logo" id="company-logo">
+                <div class="header-text">
+                    <h1>Base de Datos de Laminaciones - VC Laminations</h1>
+                    <p>Sistema de consulta de especificaciones técnicas</p>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Panel de estadísticas -->
+        <div class="stats-panel">
+            <div class="stat-card">
+                <h3 id="total-laminaciones">-</h3>
+                <p>Total Laminaciones</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="total-empresas">-</h3>
+                <p>Empresas</p>
+            </div>
+        </div>
+
+        <!-- Filtros de búsqueda -->
+        <div class="search-panel">
+            <div class="search-row">
+                <div class="search-field">
+                    <label for="empresa-filter">Empresa:</label>
+                    <select id="empresa-filter">
+                        <option value="">Todas las empresas</option>
+                    </select>
+                </div>
+                <div class="search-field">
+                    <label for="numero-parte-filter">Número de Parte:</label>
+                    <input type="text" id="numero-parte-filter" placeholder="Buscar por número de parte...">
+                </div>
+                <button id="search-btn">Buscar</button>
+                <button id="clear-btn">Limpiar</button>
+                <button id="production-btn">Registrar Producción</button>
+            </div>
+        </div>
+
+        <!-- Información de paginación -->
+        <div class="pagination-info">
+            <span id="pagination-text">Mostrando - de -</span>
+            <div class="pagination-controls">
+                <button id="prev-btn" disabled>Anterior</button>
+                <span id="page-info">Página 1 de 1</span>
+                <button id="next-btn" disabled>Siguiente</button>
+            </div>
+        </div>
+
+        <!-- Tabla de resultados -->
+        <div class="table-container">
+            <table id="laminaciones-table">
+                <thead>
+                    <tr>
+                        <th>Empresa</th>
+                        <th>Número de Parte</th>
+                        <th>Laminación VC</th>
+                        <th>Troquel</th>
+                        <th>Prensa 1</th>
+                        <th>Peso Pieza (kg)</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="laminaciones-tbody">
+                    <!-- Los datos se cargarán aquí -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Modal para detalles -->
+        <div id="detail-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Detalles de Laminación</h2>
+                <div id="detail-content">
+                    <!-- Los detalles se mostrarán aquí -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para registrar producción -->
+        <div id="production-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-production">&times;</span>
+                <h2>Registrar Producción</h2>
+                <form id="production-form">
+                    <div class="form-group">
+                        <label for="production-empresa">Empresa:</label>
+                        <select id="production-empresa" required>
+                            <option value="">Seleccionar empresa</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="production-numero-parte">Número de Parte:</label>
+                        <input type="text" id="production-numero-parte" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="production-kilos">Kilos Producidos:</label>
+                        <input type="number" id="production-kilos" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="production-alambres">Cantidad de Alambres:</label>
+                        <input type="number" id="production-alambres" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="production-libras">Libras:</label>
+                        <input type="number" id="production-libras" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="production-notas">Notas Adicionales:</label>
+                        <textarea id="production-notas" rows="3"></textarea>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="submit">Registrar Producción</button>
+                        <button type="button" id="cancel-production">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Loader -->
+        <div id="loader" class="loader">
+            <div class="spinner"></div>
+            <p>Cargando datos...</p>
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>

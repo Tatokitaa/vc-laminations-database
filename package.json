@@ -1,0 +1,26 @@
+{
+  "name": "vc-laminations-database",
+  "version": "1.0.0",
+  "description": "Sistema web para consulta de especificaciones técnicas de laminaciones - VC Laminations",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "import-data": "node import-csv.js"
+  },
+  "keywords": ["laminations", "database", "mysql", "express", "industrial"],
+  "author": "Tatokitaa <psimontirado@gmail.com>",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mysql2": "^3.6.0",
+    "cors": "^2.8.5",
+    "csv-parser": "^3.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
