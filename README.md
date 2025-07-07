@@ -9,9 +9,12 @@ Esta aplicación web permite consultar y gestionar una base de datos de laminaci
 ## ✨ Características
 
 - **Consulta de laminaciones**: Búsqueda avanzada por empresa y número de parte
-- **Interfaz moderna**: Diseño responsivo con glassmorphism
+- **Interfaz moderna**: Diseño responsivo con glassmorphism y modo oscuro
+- **PWA (Progressive Web App)**: Funciona offline e instalable como app nativa
 - **Registro de producción**: Sistema para que las naves industriales registren producción
 - **Paginación eficiente**: Navegación optimizada de grandes volúmenes de datos
+- **Sistema de notificaciones**: Toasts elegantes con múltiples tipos
+- **Funcionalidad offline**: Service Worker para cache inteligente
 - **API RESTful**: Endpoints bien documentados para integración
 
 ## 🛠️ Tecnologías Utilizadas

@@ -40,3 +40,31 @@ Thumbs.db
 
 # Archivos de configuración específicos del usuario
 config/local.js
+
+# Archivos de datos sensibles (CSV con información de la empresa)
+csv/
+
+# Cache y archivos temporales de desarrollo
+.cache/
+.parcel-cache/
+*.tmp
+*.temp
+
+# Archivos de cobertura de tests
+coverage/
+.nyc_output
+
+# Directorios de build (futuro)
+dist/
+build/
+
+# Archivos de package managers
+.npm
+.yarn-integrity
+*.tgz
+
+# Archivos de runtime
+pids
+*.pid
+*.seed
+*.pid.lock

@@ -1,0 +1,45 @@
+{
+  "name": "VC Laminations Database",
+  "short_name": "VC Laminaciones",
+  "description": "Sistema de consulta de especificaciones técnicas de laminaciones industriales",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#667eea",
+  "theme_color": "#667eea",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "es",
+  "categories": ["productivity", "business"],
+  "icons": [
+    {
+      "src": "logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Buscar Laminaciones",
+      "short_name": "Buscar",
+      "description": "Búsqueda rápida de laminaciones",
+      "url": "/?search=true",
+      "icons": [{"src": "logo.jpg", "sizes": "96x96"}]
+    },
+    {
+      "name": "Registrar Producción",
+      "short_name": "Producción",
+      "description": "Registrar nueva producción",
+      "url": "/?production=true",
+      "icons": [{"src": "logo.jpg", "sizes": "96x96"}]
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": []
+}

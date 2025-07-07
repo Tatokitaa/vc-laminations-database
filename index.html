@@ -2,11 +2,33 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="description" content="Sistema de consulta de especificaciones técnicas de laminaciones industriales - VC Laminations">
+    <meta name="theme-color" content="#667eea">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="VC Laminations DB">
     <title>Base de Datos de Laminaciones - VC Laminations</title>
     <link rel="stylesheet" href="styles.css">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Preload crítico para performance en móviles -->
+    <link rel="preload" href="logo.jpg" as="image">
+    
+    <!-- Favicons para diferentes dispositivos -->
+    <link rel="apple-touch-icon" sizes="180x180" href="logo.jpg">
+    <link rel="icon" type="image/jpeg" sizes="32x32" href="logo.jpg">
+    <link rel="icon" type="image/jpeg" sizes="16x16" href="logo.jpg">
 </head>
 <body>
+    <!-- Indicador de estado offline -->
+    <div class="offline-indicator">
+        📡 Sin conexión - Modo offline activado
+    </div>
+    
     <div class="container">
         <header>
             <div class="header-content">
@@ -14,6 +36,13 @@
                 <div class="header-text">
                     <h1>Base de Datos de Laminaciones - VC Laminations</h1>
                     <p>Sistema de consulta de especificaciones técnicas</p>
+                </div>
+                <div class="header-controls">
+                    <div class="connection-status" title="Estado de conexión"></div>
+                    <button id="theme-toggle" class="theme-toggle" title="Cambiar tema">
+                        <span class="sun-icon">☀️</span>
+                        <span class="moon-icon">🌙</span>
+                    </button>
                 </div>
             </div>
         </header>
@@ -43,10 +72,12 @@
                     <label for="numero-parte-filter">Número de Parte:</label>
                     <input type="text" id="numero-parte-filter" placeholder="Buscar por número de parte...">
                 </div>
-                <button id="search-btn">Buscar</button>
-                <button id="clear-btn">Limpiar</button>
-                <button id="production-btn">Registrar Producción</button>
-                <button id="new-lamination-btn">Nueva Laminación</button>
+                <div class="search-buttons">
+                    <button id="search-btn">Buscar</button>
+                    <button id="clear-btn">Limpiar</button>
+                    <button id="production-btn">Registrar Producción</button>
+                    <button id="new-lamination-btn">Nueva Laminación</button>
+                </div>
             </div>
         </div>
 
@@ -62,22 +93,24 @@
 
         <!-- Tabla de resultados -->
         <div class="table-container">
-            <table id="laminaciones-table">
-                <thead>
-                    <tr>
-                        <th>Empresa</th>
-                        <th>Número de Parte</th>
-                        <th>Laminación VC</th>
-                        <th>Troquel</th>
-                        <th>Prensa 1</th>
-                        <th>Peso Pieza (kg)</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="laminaciones-tbody">
-                    <!-- Los datos se cargarán aquí -->
-                </tbody>
-            </table>
+            <div class="table-wrapper">
+                <table id="laminaciones-table">
+                    <thead>
+                        <tr>
+                            <th>Empresa</th>
+                            <th>Número de Parte</th>
+                            <th class="hide-mobile">Laminación VC</th>
+                            <th class="hide-mobile">Troquel</th>
+                            <th class="hide-mobile">Prensa 1</th>
+                            <th class="hide-small">Peso Pieza (kg)</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="laminaciones-tbody">
+                        <!-- Los datos se cargarán aquí -->
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <!-- Modal para detalles -->
@@ -420,8 +453,12 @@
             <div class="spinner"></div>
             <p>Cargando datos...</p>
         </div>
+
+        <!-- Contenedor de notificaciones -->
+        <div id="notifications-container" class="notifications-container"></div>
     </div>
 
     <script src="main.js"></script>
 </body>
 </html>
+

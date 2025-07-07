@@ -54,7 +54,7 @@ const elements = {
     newLaminationModal: document.getElementById('new-lamination-modal'),
     closeNewLamination: document.querySelector('.close-new-lamination'),
     newLaminationForm: document.getElementById('new-lamination-form'),
-    cancelNewLamination: document.getElementById('cancel-new-lamination'),
+    cancelNewLamination: document.getElementById('cancel-new-laminacion'),
     
     // Loader
     loader: document.getElementById('loader')
@@ -62,8 +62,28 @@ const elements = {
 
 // Inicialización de la aplicación
 document.addEventListener('DOMContentLoaded', async () => {
+    // Registrar Service Worker para PWA
+    await registerServiceWorker();
+    
+    // Inicializar sistemas de tema y notificaciones
+    themeManager = new ThemeManager();
+    NotificationManager.init();
+    
+    // Verificar si es una PWA y mostrar botón de instalación
+    setupPWAFeatures();
+    
+    // Inicializar aplicación principal
     await initializeApp();
     setupEventListeners();
+    
+    // Mostrar notificación de bienvenida
+    setTimeout(() => {
+        NotificationManager.success(
+            '¡Bienvenido!',
+            'Sistema de laminaciones cargado correctamente',
+            3000
+        );
+    }, 1000);
 });
 
 // Inicializar la aplicación
@@ -225,13 +245,14 @@ function renderTable(data) {
         row.innerHTML = `
             <td>${item.empresa || '-'}</td>
             <td>${item.numero || '-'}</td>
-            <td>${item.laminacion_vcl || '-'}</td>
-            <td>${item.troquel || '-'}</td>
-            <td>${item.prensa_1 || '-'}</td>
-            <td>${item.peso_pieza_kg || '-'}</td>
+            <td class="hide-mobile">${item.laminacion_vcl || '-'}</td>
+            <td class="hide-mobile">${item.troquel || '-'}</td>
+            <td class="hide-mobile">${item.prensa_1 || '-'}</td>
+            <td class="hide-small">${item.peso_pieza_kg || '-'}</td>
             <td>
-                <button class="action-btn" onclick="showDetails(${item.id})">
-                    Ver Detalles
+                <button class="action-btn" onclick="showDetails(${item.id})" title="Ver detalles completos">
+                    <span class="show-mobile">Ver</span>
+                    <span class="hide-mobile">Ver Detalles</span>
                 </button>
             </td>
         `;
@@ -787,85 +808,421 @@ function hideLoader() {
     elements.loader.style.display = 'none';
 }
 
-// Función para mostrar mensajes de éxito
-function showSuccess(message) {
-    showNotification(message, 'success');
-}
+// ========================================
+// DARK MODE & THEME SYSTEM
+// ========================================
 
-// Función para mostrar mensajes de error
-function showError(message) {
-    showNotification(message, 'error');
-}
-
-function showNotification(message, type) {
-    // Crear elemento de notificación
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.textContent = message;
-    
-    // Estilos base
-    const baseStyles = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        border-radius: 8px;
-        z-index: 10000;
-        font-weight: 600;
-        animation: slideInRight 0.3s ease;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    `;
-    
-    // Estilos específicos por tipo
-    if (type === 'success') {
-        notification.style.cssText = baseStyles + `
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
-            color: white;
-        `;
-    } else {
-        notification.style.cssText = baseStyles + `
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: white;
-        `;
+class ThemeManager {
+    constructor() {
+        this.currentTheme = localStorage.getItem('theme') || 'light';
+        this.init();
     }
-    
-    document.body.appendChild(notification);
-    
-    // Remover después de unos segundos
-    const timeout = type === 'success' ? 3000 : 5000;
-    setTimeout(() => {
-        notification.style.animation = 'slideOutRight 0.3s ease';
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
+
+    init() {
+        this.applyTheme(this.currentTheme);
+        this.setupToggle();
+    }
+
+    applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        this.currentTheme = theme;
+        localStorage.setItem('theme', theme);
+        
+        // Actualizar meta theme-color para móviles
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        if (metaThemeColor) {
+            metaThemeColor.content = theme === 'dark' ? '#1a1a2e' : '#667eea';
+        }
+    }
+
+    toggleTheme() {
+        const newTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+        this.applyTheme(newTheme);
+        
+        // Notificación del cambio de tema
+        NotificationManager.show(
+            `Modo ${newTheme === 'dark' ? 'oscuro' : 'claro'} activado`,
+            'success',
+            `Tema cambiado a modo ${newTheme === 'dark' ? 'oscuro' : 'claro'}`,
+            2000
+        );
+    }
+
+    setupToggle() {
+        const toggle = document.getElementById('theme-toggle');
+        if (toggle) {
+            toggle.addEventListener('click', () => this.toggleTheme());
+        }
+    }
+
+    getCurrentTheme() {
+        return this.currentTheme;
+    }
+}
+
+// ========================================
+// NOTIFICATION SYSTEM
+// ========================================
+
+class NotificationManager {
+    static container = null;
+    static notifications = new Map();
+    static nextId = 1;
+
+    static init() {
+        this.container = document.getElementById('notifications-container');
+        if (!this.container) {
+            console.warn('Notifications container not found');
+        }
+    }
+
+    static show(title, type = 'info', message = '', duration = 5000) {
+        if (!this.container) {
+            console.warn('Notifications not initialized');
+            return null;
+        }
+
+        const id = this.nextId++;
+        const notification = this.createNotification(id, title, type, message, duration);
+        
+        this.container.appendChild(notification);
+        this.notifications.set(id, notification);
+
+        // Auto-remove after duration
+        if (duration > 0) {
+            setTimeout(() => {
+                this.remove(id);
+            }, duration);
+        }
+
+        return id;
+    }
+
+    static createNotification(id, title, type, message, duration) {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.dataset.id = id;
+
+        const icons = {
+            success: '✅',
+            error: '❌',
+            warning: '⚠️',
+            info: 'ℹ️'
+        };
+
+        notification.innerHTML = `
+            <div class="notification-icon">${icons[type] || icons.info}</div>
+            <div class="notification-content">
+                <div class="notification-title">${title}</div>
+                ${message ? `<div class="notification-message">${message}</div>` : ''}
+            </div>
+            <button class="notification-close" onclick="NotificationManager.remove(${id})">&times;</button>
+        `;
+
+        // Agregar barra de progreso si tiene duración
+        if (duration > 0) {
+            const progressBar = document.createElement('div');
+            progressBar.className = 'notification-progress';
+            progressBar.style.cssText = `
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                height: 3px;
+                background: var(--notification-color, var(--accent-primary));
+                width: 100%;
+                animation: progress ${duration}ms linear forwards;
+            `;
+            notification.appendChild(progressBar);
+
+            // Agregar animación CSS dinámicamente
+            if (!document.getElementById('notification-progress-style')) {
+                const style = document.createElement('style');
+                style.id = 'notification-progress-style';
+                style.textContent = `
+                    @keyframes progress {
+                        from { width: 100%; }
+                        to { width: 0%; }
+                    }
+                `;
+                document.head.appendChild(style);
             }
-        }, 300);
-    }, timeout);
+        }
+
+        return notification;
+    }
+
+    static remove(id) {
+        const notification = this.notifications.get(id);
+        if (notification) {
+            notification.classList.add('removing');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+                this.notifications.delete(id);
+            }, 300);
+        }
+    }
+
+    static clear() {
+        this.notifications.forEach((notification, id) => {
+            this.remove(id);
+        });
+    }
+
+    static success(title, message = '', duration = 4000) {
+        return this.show(title, 'success', message, duration);
+    }
+
+    static error(title, message = '', duration = 6000) {
+        return this.show(title, 'error', message, duration);
+    }
+
+    static warning(title, message = '', duration = 5000) {
+        return this.show(title, 'warning', message, duration);
+    }
+
+    static info(title, message = '', duration = 4000) {
+        return this.show(title, 'info', message, duration);
+    }
 }
 
-// Agregar animaciones CSS dinámicamente
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideInRight {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
+// Instanciar managers globales
+let themeManager;
+
+// Reemplazar función showError existente con el nuevo sistema
+function showError(message, title = 'Error') {
+    NotificationManager.error(title, message);
+}
+
+function showSuccess(message, title = 'Éxito') {
+    NotificationManager.success(title, message);
+}
+
+function showWarning(message, title = 'Advertencia') {
+    NotificationManager.warning(title, message);
+}
+
+// ========================================
+// PWA FUNCTIONALITY
+// ========================================
+
+// Registrar Service Worker
+async function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        try {
+            const registration = await navigator.serviceWorker.register('/service-worker.js');
+            console.log('[PWA] Service Worker registrado exitosamente:', registration);
+            
+            // Verificar actualizaciones
+            registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        // Hay una nueva versión disponible
+                        NotificationManager.info(
+                            'Actualización disponible',
+                            'Hay una nueva versión de la aplicación. Recarga la página para actualizar.',
+                            8000
+                        );
+                    }
+                });
+            });
+            
+            return registration;
+        } catch (error) {
+            console.error('[PWA] Error registrando Service Worker:', error);
+            NotificationManager.warning(
+                'PWA no disponible',
+                'La funcionalidad offline no está disponible en este navegador.'
+            );
         }
-        to {
-            transform: translateX(0);
-            opacity: 1;
+    } else {
+        console.log('[PWA] Service Worker no soportado en este navegador');
+    }
+}
+
+// Configurar funcionalidades PWA
+function setupPWAFeatures() {
+    // Detectar si ya está instalada como PWA
+    if (window.matchMedia('(display-mode: standalone)').matches) {
+        console.log('[PWA] Aplicación ejecutándose como PWA');
+        document.body.classList.add('pwa-installed');
+        return;
+    }
+    
+    // Manejar evento de instalación
+    let deferredPrompt;
+    
+    window.addEventListener('beforeinstallprompt', (event) => {
+        console.log('[PWA] Evento beforeinstallprompt disparado');
+        event.preventDefault();
+        deferredPrompt = event;
+        showInstallButton();
+    });
+    
+    // Función para mostrar botón de instalación
+    function showInstallButton() {
+        // Crear botón de instalación si no existe
+        if (!document.getElementById('install-btn')) {
+            const installButton = document.createElement('button');
+            installButton.id = 'install-btn';
+            installButton.innerHTML = '📱 Instalar App';
+            installButton.className = 'install-btn';
+            installButton.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #27ae60, #2ecc71);
+                color: white;
+                border: none;
+                padding: 12px 20px;
+                border-radius: 25px;
+                font-weight: 600;
+                cursor: pointer;
+                box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+                transition: all 0.3s ease;
+                z-index: 9999;
+                font-size: 14px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            `;
+            
+            installButton.addEventListener('click', installApp);
+            document.body.appendChild(installButton);
+            
+            // Animación de entrada
+            setTimeout(() => {
+                installButton.style.transform = 'translateY(0)';
+                installButton.style.opacity = '1';
+            }, 100);
         }
     }
     
-    @keyframes slideOutRight {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
+    // Función para instalar la aplicación
+    async function installApp() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                console.log('[PWA] Usuario aceptó la instalación');
+                NotificationManager.success(
+                    '¡Instalación exitosa!',
+                    'La aplicación se ha instalado correctamente'
+                );
+                
+                // Ocultar botón de instalación
+                const installBtn = document.getElementById('install-btn');
+                if (installBtn) {
+                    installBtn.remove();
+                }
+            } else {
+                console.log('[PWA] Usuario rechazó la instalación');
+            }
+            
+            deferredPrompt = null;
         }
     }
-`;
-document.head.appendChild(style);
+    
+    // Detectar cuando se instala la PWA
+    window.addEventListener('appinstalled', (event) => {
+        console.log('[PWA] Aplicación instalada exitosamente');
+        NotificationManager.success(
+            '¡App instalada!',
+            'Ya puedes usar VC Laminations desde tu pantalla de inicio'
+        );
+        
+        // Ocultar botón de instalación
+        const installBtn = document.getElementById('install-btn');
+        if (installBtn) {
+            installBtn.remove();
+        }
+    });
+}
+
+// Manejar estado de conexión
+function setupNetworkHandlers() {
+    // Estado inicial
+    updateNetworkStatus();
+    
+    // Escuchar cambios de conexión
+    window.addEventListener('online', () => {
+        console.log('[PWA] Conexión restaurada');
+        updateNetworkStatus();
+        NotificationManager.success(
+            'Conexión restaurada',
+            'Ya puedes acceder a todas las funciones'
+        );
+        
+        // Recargar datos si es necesario
+        if (typeof loadData === 'function') {
+            loadData();
+        }
+    });
+    
+    window.addEventListener('offline', () => {
+        console.log('[PWA] Conexión perdida');
+        updateNetworkStatus();
+        NotificationManager.warning(
+            'Sin conexión',
+            'Modo offline activado. Algunas funciones pueden estar limitadas.'
+        );
+    });
+}
+
+// Actualizar indicador de estado de red
+function updateNetworkStatus() {
+    const isOnline = navigator.onLine;
+    document.body.classList.toggle('offline', !isOnline);
+    
+    // Actualizar tema color para PWA
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+    if (themeColor) {
+        themeColor.content = isOnline ? '#667eea' : '#95a5a6';
+    }
+}
+
+// Inicializar manejadores de red
+document.addEventListener('DOMContentLoaded', () => {
+    setupNetworkHandlers();
+});
+
+// Función para limpiar cache (útil para desarrollo)
+async function clearPWACache() {
+    if ('serviceWorker' in navigator && 'caches' in window) {
+        try {
+            const cacheNames = await caches.keys();
+            await Promise.all(cacheNames.map(name => caches.delete(name)));
+            console.log('[PWA] Cache limpiado');
+            NotificationManager.success(
+                'Cache limpiado',
+                'La aplicación se ha actualizado correctamente'
+            );
+        } catch (error) {
+            console.error('[PWA] Error limpiando cache:', error);
+        }
+    }
+}
+
+// Función para forzar actualización
+function forceUpdate() {
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+            registrations.forEach(registration => {
+                registration.update();
+            });
+        });
+    }
+    window.location.reload();
+}
+
+// Hacer funciones disponibles globalmente para debugging
+if (typeof window !== 'undefined') {
+    window.PWA = {
+        clearCache: clearPWACache,
+        forceUpdate: forceUpdate,
+        checkInstallability: setupPWAFeatures
+    };
+}
