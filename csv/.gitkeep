@@ -1,0 +1,8 @@
+# Mantener esta carpeta en el repositorio
+# Los archivos CSV reales están en .gitignore por contener información sensible
+# Esta carpeta es necesaria para el funcionamiento del script de importación
+
+# Para usar el sistema:
+# 1. Coloca aquí los archivos CSV con los datos de laminaciones
+# 2. Ejecuta el script de importación: node import-csv-clean.js
+# 3. Los datos se importarán automáticamente a la base de datos MySQL
