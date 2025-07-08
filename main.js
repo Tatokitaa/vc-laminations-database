@@ -7,7 +7,25 @@ let itemsPerPage = 10;
 let totalPages = 1;
 let currentFilters = {
     empresa: '',
-    numero_parte: ''
+    numero_parte: '',
+    laminacion_vcl: '',
+    troquel: '',
+    prensa: '',
+    acero: '',
+    peso_min: '',
+    peso_max: '',
+    espesor_min: '',
+    espesor_max: '',
+    tipo_alambre: '',
+    texto_libre: ''
+};
+
+// Estado de búsquedas guardadas
+let savedSearches = JSON.parse(localStorage.getItem('savedSearches') || '[]');
+let filterOptions = {
+    prensas: [],
+    aceros: [],
+    alambres: []
 };
 
 // Elementos del DOM
@@ -16,15 +34,40 @@ const elements = {
     totalLaminaciones: document.getElementById('total-laminaciones'),
     totalEmpresas: document.getElementById('total-empresas'),
     
-    // Filtros
+    // Filtros básicos
     empresaFilter: document.getElementById('empresa-filter'),
     numeroParteFilter: document.getElementById('numero-parte-filter'),
+    laminacionFilter: document.getElementById('laminacion-filter'),
+    troqueFilter: document.getElementById('troquel-filter'),
+    
+    // Filtros avanzados
+    advancedFilters: document.getElementById('advanced-filters'),
+    prensaFilter: document.getElementById('prensa-filter'),
+    aceroFilter: document.getElementById('acero-filter'),
+    pesoMinFilter: document.getElementById('peso-min-filter'),
+    pesoMaxFilter: document.getElementById('peso-max-filter'),
+    espesorMinFilter: document.getElementById('espesor-min-filter'),
+    espesorMaxFilter: document.getElementById('espesor-max-filter'),
+    alambreFilter: document.getElementById('alambre-filter'),
+    textoLibreFilter: document.getElementById('texto-libre-filter'),
+    
+    // Controles de filtros
+    advancedToggle: document.getElementById('advanced-toggle'),
     searchBtn: document.getElementById('search-btn'),
     clearBtn: document.getElementById('clear-btn'),
+    saveSearchBtn: document.getElementById('save-search-btn'),
+    loadSearchBtn: document.getElementById('load-search-btn'),
+    exportBtn: document.getElementById('export-btn'),
     productionBtn: document.getElementById('production-btn'),
     newLaminationBtn: document.getElementById('new-lamination-btn'),
     
+    // Filtros activos
+    activeFilters: document.getElementById('active-filters'),
+    activeFiltersList: document.getElementById('active-filters-list'),
+    clearAllFilters: document.getElementById('clear-all-filters'),
+    
     // Paginación
+    resultsCounter: document.getElementById('results-count'),
     paginationText: document.getElementById('pagination-text'),
     pageInfo: document.getElementById('page-info'),
     prevBtn: document.getElementById('prev-btn'),
@@ -56,6 +99,21 @@ const elements = {
     newLaminationForm: document.getElementById('new-lamination-form'),
     cancelNewLamination: document.getElementById('cancel-new-laminacion'),
     
+    // Modales de búsquedas guardadas y exportación
+    savedSearchesModal: document.getElementById('saved-searches-modal'),
+    closeSavedSearches: document.querySelector('.close-saved-searches'),
+    searchName: document.getElementById('search-name'),
+    searchDescription: document.getElementById('search-description'),
+    saveCurrentSearch: document.getElementById('save-current-search'),
+    savedSearchesList: document.getElementById('saved-searches-list'),
+    
+    exportModal: document.getElementById('export-modal'),
+    closeExport: document.querySelector('.close-export'),
+    exportExecute: document.getElementById('export-execute'),
+    exportCancel: document.getElementById('export-cancel'),
+    exportCount: document.getElementById('export-count'),
+    exportFilters: document.getElementById('export-filters'),
+    
     // Loader
     loader: document.getElementById('loader')
 };
@@ -76,6 +134,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     await initializeApp();
     setupEventListeners();
     
+    // Configurar event listeners adicionales para modales
+    setupModalEventListeners();
+    
+    // Inicializar sistema de autocompletado
+    initializeAutocomplete();
+    
+    // Inicializar manejadores de red
+    setupNetworkHandlers();
+    
     // Mostrar notificación de bienvenida
     setTimeout(() => {
         NotificationManager.success(
@@ -86,13 +153,160 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 1000);
 });
 
+// Configurar event listeners adicionales para modales
+function setupModalEventListeners() {
+    console.log('Setting up modal event listeners...');
+    
+    // Mapeo de modales y sus funciones de cierre
+    const modals = {
+        'detail-modal': hideModal,
+        'production-modal': hideProductionModal,
+        'new-lamination-modal': hideNewLaminationModal,
+        'saved-searches-modal': hideSavedSearchesModal,
+        'export-modal': hideExportModal
+    };
+    
+    // Configurar cada modal
+    Object.keys(modals).forEach(modalId => {
+        const modal = document.getElementById(modalId);
+        const closeFn = modals[modalId];
+        
+        if (modal) {
+            console.log(`Setting up modal: ${modalId}`);
+            
+            // Limpiar listeners previos
+            const newModal = modal.cloneNode(true);
+            modal.parentNode.replaceChild(newModal, modal);
+            
+            // Actualizar referencia
+            const updatedModal = document.getElementById(modalId);
+            
+            // Botón de cierre principal (X)
+            const closeBtn = updatedModal.querySelector('.close');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log(`Closing modal ${modalId} via close button`);
+                    closeFn();
+                });
+            }
+            
+            // Botones de cierre específicos por clase
+            const closeButtons = updatedModal.querySelectorAll('.close, .close-export, .close-saved-searches, .close-production, .close-new-lamination');
+            closeButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log(`Closing modal ${modalId} via specific close button`);
+                    closeFn();
+                });
+            });
+            
+            // Clic fuera del modal
+            updatedModal.addEventListener('click', (e) => {
+                if (e.target === updatedModal) {
+                    console.log(`Closing modal ${modalId} by clicking outside`);
+                    closeFn();
+                }
+            });
+            
+            // Botones de cancelar específicos
+            const cancelButtons = updatedModal.querySelectorAll('[id*="cancel"]');
+            cancelButtons.forEach(cancelBtn => {
+                cancelBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log(`Closing modal ${modalId} via cancel button`);
+                    closeFn();
+                });
+            });
+        }
+    });
+    
+    // Event listeners adicionales para botones específicos usando IDs directos
+    const buttonMappings = [
+        { id: 'export-cancel', fn: hideExportModal },
+        { id: 'cancel-production', fn: hideProductionModal },
+        { id: 'cancel-new-laminacion', fn: hideNewLaminationModal }
+    ];
+    
+    buttonMappings.forEach(mapping => {
+        const btn = document.getElementById(mapping.id);
+        if (btn) {
+            // Remover listeners previos
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+            
+            // Agregar nuevo listener
+            const updatedBtn = document.getElementById(mapping.id);
+            if (updatedBtn) {
+                updatedBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log(`Closing modal via button ${mapping.id}`);
+                    mapping.fn();
+                });
+            }
+        }
+    });
+    
+    // Listener global para Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            console.log('Escape key pressed - closing all modals');
+            closeAllModals();
+        }
+    });
+    
+    console.log('Modal event listeners configured successfully');
+}
+
+// Función para cerrar todos los modales
+function closeAllModals() {
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+        modal.style.display = 'none';
+    });
+    console.log('All modals closed');
+}
+
+// Función universal para cerrar modales
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+        console.log(`Modal ${modalId} closed`);
+        
+        // Limpiar formularios si existen
+        const form = modal.querySelector('form');
+        if (form) {
+            form.reset();
+        }
+    }
+}
+
+// Función universal para abrir modales
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'block';
+        console.log(`Modal ${modalId} opened`);
+    }
+}
+
 // Inicializar la aplicación
 async function initializeApp() {
     try {
         showLoader();
+        
+        // Inicializar contador de resultados con valor por defecto
+        elements.resultsCounter.innerHTML = '<span>Cargando resultados...</span>';
+        
         await Promise.all([
             loadStats(),
             loadCompanies(),
+            loadFilterOptions(),
             loadData()
         ]);
     } catch (error) {
@@ -111,47 +325,48 @@ function setupEventListeners() {
     elements.productionBtn.addEventListener('click', showProductionModal);
     elements.newLaminationBtn.addEventListener('click', showNewLaminationModal);
     
+    // Nuevos controles de filtros
+    elements.advancedToggle.addEventListener('click', toggleAdvancedFilters);
+    elements.saveSearchBtn.addEventListener('click', showSavedSearchesModal);
+    elements.loadSearchBtn.addEventListener('click', showSavedSearchesModal);
+    elements.exportBtn.addEventListener('click', showExportModal);
+    elements.clearAllFilters.addEventListener('click', clearAllFilters);
+    
     // Enter en campos de búsqueda
-    elements.numeroParteFilter.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleSearch();
+    const searchFields = [
+        elements.numeroParteFilter,
+        elements.laminacionFilter,
+        elements.troqueFilter,
+        elements.pesoMinFilter,
+        elements.pesoMaxFilter,
+        elements.espesorMinFilter,
+        elements.espesorMaxFilter,
+        elements.textoLibreFilter
+    ];
+    
+    searchFields.forEach(field => {
+        if (field) {
+            field.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleSearch();
+            });
+        }
     });
     
+    // Búsqueda automática en selectores
     elements.empresaFilter.addEventListener('change', handleSearch);
+    elements.prensaFilter.addEventListener('change', handleSearch);
+    elements.aceroFilter.addEventListener('change', handleSearch);
+    elements.alambreFilter.addEventListener('change', handleSearch);
     
     // Paginación
     elements.prevBtn.addEventListener('click', () => changePage(currentPage - 1));
     elements.nextBtn.addEventListener('click', () => changePage(currentPage + 1));
     
-    // Modal de detalles
-    elements.closeModal.addEventListener('click', hideModal);
-    elements.modal.addEventListener('click', (e) => {
-        if (e.target === elements.modal) hideModal();
-    });
-    
-    // Modal de producción
-    elements.closeProductionModal.addEventListener('click', hideProductionModal);
-    elements.cancelProduction.addEventListener('click', hideProductionModal);
-    elements.productionModal.addEventListener('click', (e) => {
-        if (e.target === elements.productionModal) hideProductionModal();
-    });
+    // Formularios
     elements.productionForm.addEventListener('submit', handleProductionSubmit);
-    
-    // Modal de nueva laminación
-    elements.closeNewLamination.addEventListener('click', hideNewLaminationModal);
-    elements.cancelNewLamination.addEventListener('click', hideNewLaminationModal);
-    elements.newLaminationModal.addEventListener('click', (e) => {
-        if (e.target === elements.newLaminationModal) hideNewLaminationModal();
-    });
     elements.newLaminationForm.addEventListener('submit', handleNewLaminationSubmit);
-    
-    // Escape para cerrar modales
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            hideModal();
-            hideProductionModal();
-            hideNewLaminationModal();
-        }
-    });
+    elements.saveCurrentSearch.addEventListener('click', handleSaveSearch);
+    elements.exportExecute.addEventListener('click', handleExport);
 }
 
 // Cargar estadísticas
@@ -193,15 +408,380 @@ async function loadCompanies() {
     }
 }
 
+// Cargar opciones para filtros
+async function loadFilterOptions() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/filter-options`);
+        if (!response.ok) throw new Error('Error al cargar opciones de filtros');
+        
+        const options = await response.json();
+        filterOptions = options;
+        
+        // Cargar opciones de prensas
+        elements.prensaFilter.innerHTML = '<option value="">Todas las prensas</option>';
+        options.prensas.forEach(prensa => {
+            const option = document.createElement('option');
+            option.value = prensa;
+            option.textContent = prensa;
+            elements.prensaFilter.appendChild(option);
+        });
+        
+        // Cargar opciones de aceros
+        elements.aceroFilter.innerHTML = '<option value="">Todos los materiales</option>';
+        options.aceros.forEach(acero => {
+            const option = document.createElement('option');
+            option.value = acero;
+            option.textContent = acero;
+            elements.aceroFilter.appendChild(option);
+        });
+        
+        // Cargar opciones de tipos de alambre
+        elements.alambreFilter.innerHTML = '<option value="">Todos los tipos</option>';
+        options.alambres.forEach(alambre => {
+            const option = document.createElement('option');
+            option.value = alambre;
+            option.textContent = alambre;
+            elements.alambreFilter.appendChild(option);
+        });
+        
+    } catch (error) {
+        console.error('Error cargando opciones de filtros:', error);
+        // Si falla, mantener opciones vacías
+    }
+}
+
+// Toggle filtros avanzados
+function toggleAdvancedFilters() {
+    const isExpanded = elements.advancedFilters.classList.contains('expanded');
+    
+    if (isExpanded) {
+        elements.advancedFilters.classList.remove('expanded');
+        elements.advancedToggle.classList.remove('active');
+        elements.advancedToggle.querySelector('.toggle-text').textContent = 'Mostrar Filtros Avanzados';
+    } else {
+        elements.advancedFilters.classList.add('expanded');
+        elements.advancedToggle.classList.add('active');
+        elements.advancedToggle.querySelector('.toggle-text').textContent = 'Ocultar Filtros Avanzados';
+    }
+}
+
+// Recopilar todos los filtros actuales
+function gatherFilters() {
+    return {
+        empresa: elements.empresaFilter.value,
+        numero_parte: elements.numeroParteFilter.value,
+        laminacion_vcl: elements.laminacionFilter.value,
+        troquel: elements.troqueFilter.value,
+        prensa: elements.prensaFilter.value,
+        acero: elements.aceroFilter.value,
+        peso_min: elements.pesoMinFilter.value,
+        peso_max: elements.pesoMaxFilter.value,
+        espesor_min: elements.espesorMinFilter.value,
+        espesor_max: elements.espesorMaxFilter.value,
+        tipo_alambre: elements.alambreFilter.value,
+        texto_libre: elements.textoLibreFilter.value
+    };
+}
+
+// Actualizar filtros activos
+function updateActiveFilters() {
+    const filters = gatherFilters();
+    const activeFilters = [];
+    
+    // Mapear nombres amigables
+    const filterNames = {
+        empresa: 'Empresa',
+        numero_parte: 'Número de Parte',
+        laminacion_vcl: 'Laminación VC',
+        troquel: 'Troquel',
+        prensa: 'Prensa',
+        acero: 'Material',
+        peso_min: 'Peso Mínimo',
+        peso_max: 'Peso Máximo',
+        espesor_min: 'Espesor Mínimo',
+        espesor_max: 'Espesor Máximo',
+        tipo_alambre: 'Tipo de Alambre',
+        texto_libre: 'Búsqueda Libre'
+    };
+    
+    // Construir lista de filtros activos
+    Object.entries(filters).forEach(([key, value]) => {
+        if (value && value.trim()) {
+            activeFilters.push({
+                key,
+                name: filterNames[key],
+                value: value.trim()
+            });
+        }
+    });
+    
+    // Mostrar/ocultar panel de filtros activos
+    if (activeFilters.length > 0) {
+        elements.activeFilters.classList.add('visible');
+        elements.activeFiltersList.innerHTML = activeFilters.map(filter => `
+            <div class="filter-tag">
+                <span>${filter.name}: ${filter.value}</span>
+                <button class="remove-filter" onclick="removeFilter('${filter.key}')">×</button>
+            </div>
+        `).join('');
+    } else {
+        elements.activeFilters.classList.remove('visible');
+    }
+}
+
+// Remover filtro específico
+function removeFilter(filterKey) {
+    const filterElements = {
+        empresa: elements.empresaFilter,
+        numero_parte: elements.numeroParteFilter,
+        laminacion_vcl: elements.laminacionFilter,
+        troquel: elements.troqueFilter,
+        prensa: elements.prensaFilter,
+        acero: elements.aceroFilter,
+        peso_min: elements.pesoMinFilter,
+        peso_max: elements.pesoMaxFilter,
+        espesor_min: elements.espesorMinFilter,
+        espesor_max: elements.espesorMaxFilter,
+        tipo_alambre: elements.alambreFilter,
+        texto_libre: elements.textoLibreFilter
+    };
+    
+    const element = filterElements[filterKey];
+    if (element) {
+        element.value = '';
+        handleSearch();
+    }
+}
+
+// Limpiar todos los filtros
+function clearAllFilters() {
+    elements.empresaFilter.value = '';
+    elements.numeroParteFilter.value = '';
+    elements.laminacionFilter.value = '';
+    elements.troqueFilter.value = '';
+    elements.prensaFilter.value = '';
+    elements.aceroFilter.value = '';
+    elements.pesoMinFilter.value = '';
+    elements.pesoMaxFilter.value = '';
+    elements.espesorMinFilter.value = '';
+    elements.espesorMaxFilter.value = '';
+    elements.alambreFilter.value = '';
+    elements.textoLibreFilter.value = '';
+    
+    handleSearch();
+}
+
+// Mostrar modal de búsquedas guardadas
+function showSavedSearchesModal() {
+    loadSavedSearches();
+    elements.savedSearchesModal.style.display = 'block';
+}
+
+// Ocultar modal de búsquedas guardadas
+function hideSavedSearchesModal() {
+    elements.savedSearchesModal.style.display = 'none';
+}
+
+// Cargar búsquedas guardadas
+function loadSavedSearches() {
+    if (savedSearches.length === 0) {
+        elements.savedSearchesList.innerHTML = '<p style="text-align: center; color: #7f8c8d;">No hay búsquedas guardadas</p>';
+        return;
+    }
+    
+    elements.savedSearchesList.innerHTML = savedSearches.map(search => `
+        <div class="saved-search-item">
+            <div class="saved-search-info">
+                <h4>${search.name}</h4>
+                <p>${search.description || 'Sin descripción'}</p>
+                <small>Guardado: ${new Date(search.created).toLocaleDateString()}</small>
+            </div>
+            <div class="saved-search-actions">
+                <button class="load-search-btn" onclick="loadSavedSearch('${search.id}')">Cargar</button>
+                <button class="delete-search-btn" onclick="deleteSavedSearch('${search.id}')">Eliminar</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+// Guardar búsqueda actual
+function handleSaveSearch() {
+    const name = elements.searchName.value.trim();
+    if (!name) {
+        NotificationManager.warning('Campo requerido', 'Por favor, ingresa un nombre para la búsqueda');
+        return;
+    }
+    
+    const filters = gatherFilters();
+    const hasFilters = Object.values(filters).some(value => value && value.trim());
+    
+    if (!hasFilters) {
+        NotificationManager.warning('Sin filtros', 'No hay filtros aplicados para guardar');
+        return;
+    }
+    
+    const search = {
+        id: Date.now().toString(),
+        name,
+        description: elements.searchDescription.value.trim(),
+        filters,
+        created: new Date().toISOString()
+    };
+    
+    savedSearches.push(search);
+    localStorage.setItem('savedSearches', JSON.stringify(savedSearches));
+    
+    NotificationManager.success('Búsqueda guardada', `"${name}" se guardó correctamente`);
+    
+    // Limpiar formulario
+    elements.searchName.value = '';
+    elements.searchDescription.value = '';
+    
+    // Recargar lista
+    loadSavedSearches();
+}
+
+// Cargar búsqueda guardada
+function loadSavedSearch(searchId) {
+    const search = savedSearches.find(s => s.id === searchId);
+    if (!search) return;
+    
+    // Aplicar filtros
+    const filterElements = {
+        empresa: elements.empresaFilter,
+        numero_parte: elements.numeroParteFilter,
+        laminacion_vcl: elements.laminacionFilter,
+        troquel: elements.troqueFilter,
+        prensa: elements.prensaFilter,
+        acero: elements.aceroFilter,
+        peso_min: elements.pesoMinFilter,
+        peso_max: elements.pesoMaxFilter,
+        espesor_min: elements.espesorMinFilter,
+        espesor_max: elements.espesorMaxFilter,
+        tipo_alambre: elements.alambreFilter,
+        texto_libre: elements.textoLibreFilter
+    };
+    
+    Object.entries(search.filters).forEach(([key, value]) => {
+        const element = filterElements[key];
+        if (element) {
+            element.value = value || '';
+        }
+    });
+    
+    // Mostrar filtros avanzados si es necesario
+    const advancedFiltersUsed = ['prensa', 'acero', 'peso_min', 'peso_max', 'espesor_min', 'espesor_max', 'tipo_alambre', 'texto_libre'];
+    const needsAdvanced = advancedFiltersUsed.some(key => search.filters[key]);
+    
+    if (needsAdvanced && !elements.advancedFilters.classList.contains('expanded')) {
+        toggleAdvancedFilters();
+    }
+    
+    // Ejecutar búsqueda
+    handleSearch();
+    
+    // Cerrar modal
+    hideSavedSearchesModal();
+    
+    NotificationManager.success('Búsqueda cargada', `"${search.name}" se aplicó correctamente`);
+}
+
+// Eliminar búsqueda guardada
+function deleteSavedSearch(searchId) {
+    const searchIndex = savedSearches.findIndex(s => s.id === searchId);
+    if (searchIndex === -1) return;
+    
+    const search = savedSearches[searchIndex];
+    
+    if (confirm(`¿Estás seguro de que quieres eliminar la búsqueda "${search.name}"?`)) {
+        savedSearches.splice(searchIndex, 1);
+        localStorage.setItem('savedSearches', JSON.stringify(savedSearches));
+        loadSavedSearches();
+        NotificationManager.info('Búsqueda eliminada', `"${search.name}" fue eliminada`);
+    }
+}
+
+// Mostrar modal de exportación
+function showExportModal() {
+    updateExportPreview();
+    if (elements.exportModal) {
+        elements.exportModal.style.display = 'block';
+        console.log('Export modal shown');
+    }
+}
+
+// Ocultar modal de exportación
+function hideExportModal() {
+    if (elements.exportModal) {
+        elements.exportModal.style.display = 'none';
+        console.log('Export modal hidden');
+    }
+}
+
+// Actualizar vista previa de exportación
+function updateExportPreview() {
+    const filters = gatherFilters();
+    const activeFilters = Object.entries(filters).filter(([key, value]) => value && value.trim());
+    
+    // Simular conteo (en implementación real, esto vendría del servidor)
+    elements.exportCount.textContent = 'Calculando...';
+    elements.exportFilters.textContent = activeFilters.length > 0 ? 
+        activeFilters.map(([key, value]) => `${key}: ${value}`).join(', ') : 'Ninguno';
+    
+    // Obtener conteo real del servidor
+    fetch(`${API_BASE_URL}/laminaciones/count?${new URLSearchParams(filters)}`)
+        .then(response => response.json())
+        .then(data => {
+            elements.exportCount.textContent = data.count?.toLocaleString() || '0';
+        })
+        .catch(error => {
+            console.error('Error obteniendo conteo:', error);
+            elements.exportCount.textContent = 'Error';
+        });
+}
+
+// Manejar exportación
+function handleExport() {
+    const format = document.querySelector('input[name="export-format"]:checked').value;
+    const includeHeaders = document.getElementById('include-headers').checked;
+    const includeAllFields = document.getElementById('include-all-fields').checked;
+    const includeFiltersInfo = document.getElementById('include-filters-info').checked;
+    
+    const filters = gatherFilters();
+    const exportParams = {
+        format,
+        includeHeaders,
+        includeAllFields,
+        includeFiltersInfo,
+        ...filters
+    };
+    
+    // Crear enlace de descarga
+    const queryParams = new URLSearchParams(exportParams);
+    const downloadUrl = `${API_BASE_URL}/laminaciones/export?${queryParams}`;
+    
+    // Crear enlace temporal y hacer clic
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = `laminaciones_${new Date().toISOString().split('T')[0]}.${format}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    NotificationManager.success('Exportación iniciada', 'La descarga comenzará en breve');
+    hideExportModal();
+}
+
 // Cargar datos de laminaciones
 async function loadData() {
     try {
         showLoader();
         
+        const filters = gatherFilters();
         const queryParams = new URLSearchParams({
             page: currentPage,
             limit: itemsPerPage,
-            ...currentFilters
+            ...filters
         });
         
         // Remover parámetros vacíos
@@ -216,6 +796,7 @@ async function loadData() {
         
         renderTable(data.data);
         updatePagination(data.pagination);
+        updateActiveFilters();
         
     } catch (error) {
         console.error('Error cargando datos:', error);
@@ -223,6 +804,18 @@ async function loadData() {
     } finally {
         hideLoader();
     }
+}
+
+// Manejar búsqueda
+function handleSearch() {
+    currentPage = 1;
+    currentFilters = gatherFilters();
+    loadData();
+}
+
+// Manejar limpiar filtros
+function handleClear() {
+    clearAllFilters();
 }
 
 // Renderizar tabla
@@ -244,15 +837,14 @@ function renderTable(data) {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${item.empresa || '-'}</td>
-            <td>${item.numero || '-'}</td>
+            <td>${item.numero_parte || '-'}</td>
             <td class="hide-mobile">${item.laminacion_vcl || '-'}</td>
             <td class="hide-mobile">${item.troquel || '-'}</td>
             <td class="hide-mobile">${item.prensa_1 || '-'}</td>
-            <td class="hide-small">${item.peso_pieza_kg || '-'}</td>
+            <td class="hide-small">${item.peso_pieza_kg ? parseFloat(item.peso_pieza_kg).toFixed(6) : '-'}</td>
             <td>
-                <button class="action-btn" onclick="showDetails(${item.id})" title="Ver detalles completos">
-                    <span class="show-mobile">Ver</span>
-                    <span class="hide-mobile">Ver Detalles</span>
+                <button class="btn-details" onclick="showDetails('${item.id}')">
+                    Ver Detalles
                 </button>
             </td>
         `;
@@ -260,44 +852,38 @@ function renderTable(data) {
     });
 }
 
-// Actualizar información de paginación
+// Actualizar contador de resultados
+function updateResultsCounter(totalItems) {
+    if (totalItems === 0) {
+        elements.resultsCounter.innerHTML = '<span>No se encontraron resultados</span>';
+    } else if (totalItems === 1) {
+        elements.resultsCounter.innerHTML = '<span><span class="highlight">1</span> resultado encontrado</span>';
+    } else {
+        elements.resultsCounter.innerHTML = `<span><span class="highlight">${totalItems}</span> resultados encontrados</span>`;
+    }
+}
+
+// Actualizar paginación
 function updatePagination(pagination) {
-    if (!pagination) return;
+    totalPages = pagination.totalPages;
+    currentPage = pagination.currentPage;
     
-    currentPage = pagination.page || 1;
-    totalPages = pagination.totalPages || 1;
+    // Actualizar contador de resultados
+    updateResultsCounter(pagination.totalItems);
     
-    const startItem = ((currentPage - 1) * itemsPerPage) + 1;
-    const endItem = Math.min(currentPage * itemsPerPage, pagination.total || 0);
+    elements.paginationText.textContent = 
+        `Mostrando ${pagination.startItem} - ${pagination.endItem} de ${pagination.totalItems}`;
     
-    elements.paginationText.textContent = `Mostrando ${startItem} - ${endItem} de ${pagination.total || 0}`;
     elements.pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
     
     elements.prevBtn.disabled = currentPage <= 1;
     elements.nextBtn.disabled = currentPage >= totalPages;
 }
 
-// Manejar búsqueda
-function handleSearch() {
-    currentFilters.empresa = elements.empresaFilter.value;
-    currentFilters.numero_parte = elements.numeroParteFilter.value;
-    currentPage = 1;
-    loadData();
-}
-
-// Limpiar filtros
-function handleClear() {
-    elements.empresaFilter.value = '';
-    elements.numeroParteFilter.value = '';
-    currentFilters = { empresa: '', numero_parte: '' };
-    currentPage = 1;
-    loadData();
-}
-
 // Cambiar página
-function changePage(newPage) {
-    if (newPage >= 1 && newPage <= totalPages) {
-        currentPage = newPage;
+function changePage(page) {
+    if (page >= 1 && page <= totalPages) {
+        currentPage = page;
         loadData();
     }
 }
@@ -305,303 +891,96 @@ function changePage(newPage) {
 // Mostrar detalles
 async function showDetails(id) {
     try {
-        showLoader();
         const response = await fetch(`${API_BASE_URL}/laminaciones/${id}`);
+        if (!response.ok) throw new Error('Error al cargar detalles');
         
-        if (!response.ok) {
-            throw new Error('Error al cargar los detalles de la laminación');
-        }
+        const data = await response.json();
         
-        const laminacion = await response.json();
-        renderDetailModal(laminacion);
+        // Crear HTML con todos los detalles
+        const detailsHTML = `
+            <div class="detail-grid">
+                <div class="detail-section">
+                    <h3>Información Básica</h3>
+                    <p><strong>Empresa:</strong> ${data.empresa || '-'}</p>
+                    <p><strong>Número de Parte:</strong> ${data.numero_parte || '-'}</p>
+                    <p><strong>Descripción del Cliente:</strong> ${data.descripcion_cliente || '-'}</p>
+                    <p><strong>Nivel de Revisión:</strong> ${data.nivel_revision || '-'}</p>
+                    <p><strong>Laminación VCL:</strong> ${data.laminacion_vcl || '-'}</p>
+                    <p><strong>Referencia:</strong> ${data.referencia || '-'}</p>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>Información de Troquel</h3>
+                    <p><strong>Troquel:</strong> ${data.troquel || '-'}</p>
+                    <p><strong>Paso Troquel:</strong> ${data.paso_troquel_mm ? data.paso_troquel_mm + ' mm' : '-'}</p>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>Configuración de Prensas</h3>
+                    <p><strong>Prensa 1:</strong> ${data.prensa_1 || '-'}</p>
+                    <p><strong>Prensa 2:</strong> ${data.prensa_2 || '-'}</p>
+                    <p><strong>Prensa 3:</strong> ${data.prensa_3 || '-'}</p>
+                    <p><strong>Prensa 4:</strong> ${data.prensa_4 || '-'}</p>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>Especificaciones de Material</h3>
+                    <p><strong>Acero 1:</strong> ${data.acero_1 || '-'}</p>
+                    <p><strong>Acero 2:</strong> ${data.acero_2 || '-'}</p>
+                    <p><strong>Acero 3:</strong> ${data.acero_3 || '-'}</p>
+                    <p><strong>Horneado:</strong> ${data.horneado || '-'}</p>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>Dimensiones y Pesos</h3>
+                    <p><strong>Espesor:</strong> ${data.espesor_pulg ? parseFloat(data.espesor_pulg).toFixed(6) + ' pulg.' : '-'}</p>
+                    <p><strong>Ancho Cinta:</strong> ${data.ancho_cinta_pulg ? parseFloat(data.ancho_cinta_pulg).toFixed(3) + ' pulg.' : '-'}</p>
+                    <p><strong>Peso por Pieza:</strong> ${data.peso_pieza_kg ? parseFloat(data.peso_pieza_kg).toFixed(6) + ' kg' : '-'}</p>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>Configuración de Alambre</h3>
+                    <p><strong>Tipo de Alambre:</strong> ${data.tipo_alambre || '-'}</p>
+                    <p><strong>Calibre de Alambre:</strong> ${data.cal_alambre || '-'}</p>
+                    <p><strong>Longitud Corte:</strong> ${data.long_corte_alambre || '-'}</p>
+                    <p><strong>Peso de Alambre:</strong> ${data.peso_alambre_kg ? parseFloat(data.peso_alambre_kg).toFixed(6) + ' kg' : '-'}</p>
+                    <p><strong>Piezas por Alambre:</strong> ${data.piezas_por_alambre || '-'}</p>
+                </div>
+                
+                <div class="detail-section">
+                    <h3>Características Especiales</h3>
+                    <p>${data.caracteristica_especial || 'Ninguna'}</p>
+                </div>
+            </div>
+        `;
+        
+        elements.detailContent.innerHTML = detailsHTML;
+        elements.modal.style.display = 'block';
         
     } catch (error) {
         console.error('Error cargando detalles:', error);
         showError('Error al cargar los detalles de la laminación');
-    } finally {
-        hideLoader();
     }
 }
 
-// Renderizar modal de detalles
-function renderDetailModal(laminacion) {
-    const detailContent = elements.detailContent;
-    
-    detailContent.innerHTML = `
-        <div class="detail-sections">
-            <!-- Información Básica -->
-            <div class="detail-section">
-                <h3>Información Básica</h3>
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <label>Empresa:</label>
-                        <span>${laminacion.empresa || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Número:</label>
-                        <span>${laminacion.numero || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Número de Parte:</label>
-                        <span>${laminacion.numero_parte || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Descripción del Cliente:</label>
-                        <span>${laminacion.descripcion_cliente || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Nivel de Revisión:</label>
-                        <span>${laminacion.nivel_revision || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Laminación VCL:</label>
-                        <span>${laminacion.laminacion_vcl || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Referencia:</label>
-                        <span>${laminacion.referencia || '-'}</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Información de Troquel -->
-            <div class="detail-section">
-                <h3>Información de Troquel</h3>
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <label>Troquel:</label>
-                        <span>${laminacion.troquel || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Paso Troquel (mm):</label>
-                        <span>${laminacion.paso_troquel_mm || '-'}</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Configuración de Prensas -->
-            <div class="detail-section">
-                <h3>Configuración de Prensas</h3>
-                <div class="detail-grid">
-                    <!-- Prensa 1 -->
-                    <div class="detail-item">
-                        <label>Prensa 1:</label>
-                        <span>${laminacion.prensa_1 || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Placas/Paralelas:</label>
-                        <span>${laminacion.placas_paralelas || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Stackers:</label>
-                        <span>${laminacion.stackers || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Bandas:</label>
-                        <span>${laminacion.bandas || '-'}</span>
-                    </div>
-                    ${renderPrenseAdditional(laminacion, 2)}
-                    ${renderPrenseAdditional(laminacion, 3)}
-                    ${renderPrenseAdditional(laminacion, 4)}
-                </div>
-            </div>
-
-            <!-- Especificaciones de Material -->
-            <div class="detail-section">
-                <h3>Especificaciones de Material</h3>
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <label>Acero 1:</label>
-                        <span>${laminacion.acero_1 || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Acero 2:</label>
-                        <span>${laminacion.acero_2 || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Acero 3:</label>
-                        <span>${laminacion.acero_3 || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Horneado:</label>
-                        <span>${laminacion.horneado || '-'}</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dimensiones y Pesos -->
-            <div class="detail-section">
-                <h3>Dimensiones y Pesos</h3>
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <label>Espesor (pulg.):</label>
-                        <span>${laminacion.espesor_pulg || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Ancho Cinta (pulg.):</label>
-                        <span>${laminacion.ancho_cinta_pulg || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Peso por Pieza (kg):</label>
-                        <span>${laminacion.peso_pieza_kg || '-'}</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Configuración de Alambre (Unidad de Agrupación) -->
-            <div class="detail-section">
-                <h3>Configuración de Alambre (Unidad de Agrupación)</h3>
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <label>Long. Corte de Alambre:</label>
-                        <span>${laminacion.long_corte_alambre || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Calibre de Alambre:</label>
-                        <span>${laminacion.cal_alambre || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Tipo de Alambre:</label>
-                        <span>${laminacion.tipo_alambre || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Lubricante:</label>
-                        <span>${laminacion.lubricante || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Long. Alambre/Stack Final (pulg.):</label>
-                        <span>${laminacion.long_alambre_stack_final_pulg || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Piezas por Alambre (unidad):</label>
-                        <span>${laminacion.piezas_por_alambre || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Peso de un Alambre (kg):</label>
-                        <span>${laminacion.peso_alambre_kg || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Alambres por Caja:</label>
-                        <span>${laminacion.alambres_stacks_por_caja || '-'}</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Información de Empaque y Distribución -->
-            <div class="detail-section">
-                <h3>Información de Empaque y Distribución</h3>
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <label>Tamaño de Caja:</label>
-                        <span>${laminacion.tamano_caja || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Tamaño de Tarima:</label>
-                        <span>${laminacion.tamano_tarima || '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Tipo de Tarima:</label>
-                        <span>${laminacion.tipo_tarima || '-'}</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Características Especiales -->
-            ${laminacion.caracteristica_especial ? `
-                <div class="detail-section">
-                    <h3>Características Especiales</h3>
-                    <div class="detail-full">
-                        <p>${laminacion.caracteristica_especial}</p>
-                    </div>
-                </div>
-            ` : ''}
-
-            <!-- Información de Sistema -->
-            <div class="detail-section">
-                <h3>Información del Sistema</h3>
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <label>ID:</label>
-                        <span>${laminacion.id}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Fecha de Importación:</label>
-                        <span>${laminacion.fecha_importacion ? new Date(laminacion.fecha_importacion).toLocaleString() : '-'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Creado por:</label>
-                        <span>${laminacion.creado_por || 'Importación'}</span>
-                    </div>
-                    <div class="detail-item">
-                        <label>Estado:</label>
-                        <span>${laminacion.activo === 'S' ? 'Activo' : 'Inactivo'}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    // Mostrar modal
-    elements.modal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
-}
-
-// Función auxiliar para renderizar prensas adicionales
-function renderPrenseAdditional(laminacion, numero) {
-    const prensa = laminacion[`prensa_${numero}`];
-    const placas = laminacion[`placas_paralelas_${numero}`];
-    const stackers = laminacion[`stackers_${numero}`];
-    const bandas = laminacion[`bandas_${numero}`];
-    
-    // Solo mostrar si hay algún dato
-    if (!prensa && !placas && !stackers && !bandas) {
-        return '';
-    }
-    
-    return `
-        <!-- Prensa ${numero} -->
-        <div class="detail-item">
-            <label>Prensa ${numero}:</label>
-            <span>${prensa || '-'}</span>
-        </div>
-        <div class="detail-item">
-            <label>Placas/Paralelas ${numero}:</label>
-            <span>${placas || '-'}</span>
-        </div>
-        <div class="detail-item">
-            <label>Stackers ${numero}:</label>
-            <span>${stackers || '-'}</span>
-        </div>
-        <div class="detail-item">
-            <label>Bandas ${numero}:</label>
-            <span>${bandas || '-'}</span>
-        </div>
-    `;
-}
-
-// Funciones para modal de detalles
+// Ocultar modal
 function hideModal() {
     elements.modal.style.display = 'none';
-    document.body.style.overflow = 'auto';
 }
 
-// Funciones para modal de producción
+// Mostrar modal de producción
 function showProductionModal() {
     loadCompaniesForProduction();
     elements.productionModal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
 }
 
+// Ocultar modal de producción
 function hideProductionModal() {
     elements.productionModal.style.display = 'none';
-    document.body.style.overflow = 'auto';
-    resetProductionForm();
-}
-
-function resetProductionForm() {
     elements.productionForm.reset();
 }
 
+// Cargar empresas para producción
 async function loadCompaniesForProduction() {
     try {
         const response = await fetch(`${API_BASE_URL}/empresas`);
@@ -609,10 +988,8 @@ async function loadCompaniesForProduction() {
         
         const companies = await response.json();
         
-        // Limpiar opciones existentes (excepto la primera)
         elements.productionEmpresa.innerHTML = '<option value="">Seleccionar empresa</option>';
         
-        // Agregar empresas
         companies.forEach(company => {
             const option = document.createElement('option');
             option.value = company.empresa;
@@ -621,70 +998,58 @@ async function loadCompaniesForProduction() {
         });
     } catch (error) {
         console.error('Error cargando empresas para producción:', error);
-        showError('Error al cargar empresas');
     }
 }
 
+// Manejar envío de producción
 async function handleProductionSubmit(e) {
     e.preventDefault();
     
-    const productionData = {
+    const formData = {
         empresa: elements.productionEmpresa.value,
         numero_parte: elements.productionNumeroParte.value,
-        kilos: parseFloat(elements.productionKilos.value),
-        alambres: elements.productionAlambres.value ? parseInt(elements.productionAlambres.value) : null, // Alambres como unidades de agrupación
-        libras: elements.productionLibras.value ? parseFloat(elements.productionLibras.value) : null,
-        notas: elements.productionNotas.value,
-        fecha: new Date().toISOString().split('T')[0]
+        kilos_producidos: parseFloat(elements.productionKilos.value),
+        cantidad_alambres: parseInt(elements.productionAlambres.value) || null,
+        libras: parseFloat(elements.productionLibras.value) || null,
+        notas: elements.productionNotas.value
     };
-
+    
     try {
-        showLoader();
         const response = await fetch(`${API_BASE_URL}/produccion`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
-            body: JSON.stringify(productionData)
+            body: JSON.stringify(formData)
         });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Error al registrar producción');
-        }
-
-        const result = await response.json();
-        showSuccess('Producción registrada exitosamente');
+        
+        if (!response.ok) throw new Error('Error al registrar producción');
+        
+        showSuccess('Producción registrada correctamente');
         hideProductionModal();
         
         // Recargar estadísticas
-        await loadStats();
+        loadStats();
         
     } catch (error) {
         console.error('Error registrando producción:', error);
-        showError(error.message || 'Error al registrar producción');
-    } finally {
-        hideLoader();
+        showError('Error al registrar la producción');
     }
 }
 
-// Funciones para modal de nueva laminación
+// Mostrar modal de nueva laminación
 function showNewLaminationModal() {
     loadCompaniesForNewLamination();
     elements.newLaminationModal.style.display = 'block';
-    document.body.style.overflow = 'hidden';
 }
 
+// Ocultar modal de nueva laminación
 function hideNewLaminationModal() {
     elements.newLaminationModal.style.display = 'none';
-    document.body.style.overflow = 'auto';
-    resetNewLaminationForm();
-}
-
-function resetNewLaminationForm() {
     elements.newLaminationForm.reset();
 }
 
+// Cargar empresas para nueva laminación
 async function loadCompaniesForNewLamination() {
     try {
         const response = await fetch(`${API_BASE_URL}/empresas`);
@@ -692,27 +1057,24 @@ async function loadCompaniesForNewLamination() {
         
         const companies = await response.json();
         
-        // Buscar el select de empresa en el modal de nueva laminación
-        const empresaSelect = document.getElementById('new-empresa');
-        empresaSelect.innerHTML = '<option value="">Seleccionar empresa</option>';
+        const newEmpresaSelect = document.getElementById('new-empresa');
+        newEmpresaSelect.innerHTML = '<option value="">Seleccionar empresa</option>';
         
-        // Agregar empresas
         companies.forEach(company => {
             const option = document.createElement('option');
             option.value = company.empresa;
             option.textContent = company.empresa;
-            empresaSelect.appendChild(option);
+            newEmpresaSelect.appendChild(option);
         });
     } catch (error) {
         console.error('Error cargando empresas para nueva laminación:', error);
-        showError('Error al cargar empresas');
     }
 }
 
+// Manejar envío de nueva laminación
 async function handleNewLaminationSubmit(e) {
     e.preventDefault();
     
-    // Recopilar todos los datos del formulario
     const formData = {
         empresa: document.getElementById('new-empresa').value,
         numero_parte: document.getElementById('new-numero-parte').value,
@@ -723,83 +1085,42 @@ async function handleNewLaminationSubmit(e) {
         troquel: document.getElementById('new-troquel').value,
         paso_troquel_mm: parseFloat(document.getElementById('new-paso-troquel').value) || null,
         prensa_1: document.getElementById('new-prensa-1').value,
-        placas_paralelas: document.getElementById('new-placas-paralelas').value,
-        stackers: document.getElementById('new-stackers').value,
-        bandas: document.getElementById('new-bandas').value,
-        prensa_2: document.getElementById('new-prensa-2').value || null,
-        placas_paralelas_2: document.getElementById('new-placas-paralelas-2').value || null,
-        stackers_2: document.getElementById('new-stackers-2').value || null,
-        bandas_2: document.getElementById('new-bandas-2').value || null,
-        prensa_3: document.getElementById('new-prensa-3').value || null,
-        placas_paralelas_3: document.getElementById('new-placas-paralelas-3').value || null,
-        stackers_3: document.getElementById('new-stackers-3').value || null,
-        bandas_3: document.getElementById('new-bandas-3').value || null,
-        prensa_4: document.getElementById('new-prensa-4').value || null,
-        placas_paralelas_4: document.getElementById('new-placas-paralelas-4').value || null,
-        stackers_4: document.getElementById('new-stackers-4').value || null,
-        bandas_4: document.getElementById('new-bandas-4').value || null,
-        long_corte_alambre: parseFloat(document.getElementById('new-long-corte-alambre').value) || null,
-        cal_alambre: document.getElementById('new-cal-alambre').value,
-        tipo_alambre: document.getElementById('new-tipo-alambre').value,
-        lubricante: document.getElementById('new-lubricante').value,
-        horneado: document.getElementById('new-horneado').value,
+        prensa_2: document.getElementById('new-prensa-2').value,
+        prensa_3: document.getElementById('new-prensa-3').value,
+        prensa_4: document.getElementById('new-prensa-4').value,
         acero_1: document.getElementById('new-acero-1').value,
         acero_2: document.getElementById('new-acero-2').value,
         acero_3: document.getElementById('new-acero-3').value,
+        horneado: document.getElementById('new-horneado').value,
         espesor_pulg: parseFloat(document.getElementById('new-espesor-pulg').value) || null,
-        ancho_cinta_pulg: parseFloat(document.getElementById('new-ancho-cinta').value) || null,
-        peso_pieza_kg: parseFloat(document.getElementById('new-peso-pieza').value) || null,
-        long_alambre_stack_final_pulg: parseFloat(document.getElementById('new-long-alambre-stack').value) || null,
-        piezas_por_alambre: parseInt(document.getElementById('new-piezas-alambre').value) || null, // Cuántas piezas individuales forman un "alambre" (unidad de agrupación)
-        peso_alambre_kg: parseFloat(document.getElementById('new-peso-alambre').value) || null, // Peso total de un "alambre" completo
-        tamano_caja: document.getElementById('new-tamano-caja').value,
-        alambres_stacks_por_caja: parseInt(document.getElementById('new-alambres-caja').value) || null,
-        tamano_tarima: document.getElementById('new-tamano-tarima').value,
-        tipo_tarima: document.getElementById('new-tipo-tarima').value,
-        caracteristica_especial: document.getElementById('new-caracteristica-especial').value
+        peso_pieza_kg: parseFloat(document.getElementById('new-peso-pieza').value) || null
     };
-
-    // Validaciones básicas
-    if (!formData.empresa || !formData.numero_parte) {
-        showError('Empresa y Número de Parte son campos requeridos');
-        return;
-    }
-
+    
     try {
-        showLoader();
         const response = await fetch(`${API_BASE_URL}/laminaciones`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify(formData)
         });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Error al crear laminación');
-        }
-
-        const result = await response.json();
-        showSuccess(`Laminación creada exitosamente. Número asignado: ${result.numero} para ${result.empresa}`);
+        
+        if (!response.ok) throw new Error('Error al crear laminación');
+        
+        NotificationManager.success('Laminación creada', 'La nueva laminación se creó correctamente');
         hideNewLaminationModal();
         
         // Recargar datos y estadísticas
-        await Promise.all([
-            loadStats(),
-            loadCompanies(),
-            loadData()
-        ]);
+        loadStats();
+        loadData();
         
     } catch (error) {
         console.error('Error creando laminación:', error);
-        showError(error.message || 'Error al crear laminación');
-    } finally {
-        hideLoader();
+        NotificationManager.error('Error', 'No se pudo crear la laminación');
     }
 }
 
-// Funciones de utilidad
+// Mostrar/ocultar loader
 function showLoader() {
     elements.loader.style.display = 'flex';
 }
@@ -1184,11 +1505,6 @@ function updateNetworkStatus() {
     }
 }
 
-// Inicializar manejadores de red
-document.addEventListener('DOMContentLoaded', () => {
-    setupNetworkHandlers();
-});
-
 // Función para limpiar cache (útil para desarrollo)
 async function clearPWACache() {
     if ('serviceWorker' in navigator && 'caches' in window) {
@@ -1225,4 +1541,333 @@ if (typeof window !== 'undefined') {
         forceUpdate: forceUpdate,
         checkInstallability: setupPWAFeatures
     };
+}
+
+// ========================================
+// SISTEMA DE AUTOCOMPLETADO
+// ========================================
+
+// Estado del autocompletado
+let autocompleteState = {
+    isOpen: false,
+    currentField: null,
+    suggestions: [],
+    selectedIndex: -1,
+    debounceTimer: null,
+    currentRequest: null
+};
+
+// Elementos del DOM para autocompletado
+const autocompleteElements = {
+    container: document.getElementById('autocomplete-suggestions'),
+    // Campos que tendrán autocompletado
+    fields: {
+        'numero-parte-filter': 'numeros-parte',
+        'laminacion-filter': 'laminaciones',
+        'troquel-filter': 'troqueles',
+        'texto-libre-filter': 'busqueda-libre'
+    }
+};
+
+// Función para inicializar el autocompletado
+function initializeAutocomplete() {
+    console.log('Inicializando sistema de autocompletado...');
+    
+    // Configurar cada campo con autocompletado
+    Object.keys(autocompleteElements.fields).forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            console.log(`Configurando autocompletado para: ${fieldId}`);
+            setupFieldAutocomplete(field, fieldId);
+        }
+    });
+    
+    // Listener global para cerrar autocompletado
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.autocomplete-container') && 
+            !e.target.closest('.search-field')) {
+            hideAutocomplete();
+        }
+    });
+    
+    // Listener para Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && autocompleteState.isOpen) {
+            hideAutocomplete();
+        }
+    });
+}
+
+// Configurar autocompletado para un campo específico
+function setupFieldAutocomplete(field, fieldId) {
+    const endpoint = autocompleteElements.fields[fieldId];
+    
+    field.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        handleAutocompleteInput(field, endpoint, query);
+    });
+    
+    field.addEventListener('keydown', (e) => {
+        handleAutocompleteKeydown(e, field);
+    });
+    
+    field.addEventListener('focus', (e) => {
+        const query = e.target.value.trim();
+        if (query.length >= 2) {
+            handleAutocompleteInput(field, endpoint, query);
+        }
+    });
+    
+    field.addEventListener('blur', (e) => {
+        // Delay para permitir clic en sugerencia
+        setTimeout(() => {
+            hideAutocomplete();
+        }, 200);
+    });
+}
+
+// Manejar entrada de texto en campo de autocompletado
+function handleAutocompleteInput(field, endpoint, query) {
+    // Limpiar timer anterior
+    if (autocompleteState.debounceTimer) {
+        clearTimeout(autocompleteState.debounceTimer);
+    }
+    
+    // Cancelar request anterior
+    if (autocompleteState.currentRequest) {
+        autocompleteState.currentRequest.abort();
+    }
+    
+    if (query.length < 2) {
+        hideAutocomplete();
+        return;
+    }
+    
+    // Debounce de 300ms
+    autocompleteState.debounceTimer = setTimeout(() => {
+        fetchSuggestions(field, endpoint, query);
+    }, 300);
+}
+
+// Buscar sugerencias en el servidor
+async function fetchSuggestions(field, endpoint, query) {
+    try {
+        showAutocompleteLoading(field);
+        
+        const controller = new AbortController();
+        autocompleteState.currentRequest = controller;
+        
+        const response = await fetch(`${API_BASE_URL}/autocomplete/${endpoint}?q=${encodeURIComponent(query)}`, {
+            signal: controller.signal
+        });
+        
+        if (!response.ok) {
+            throw new Error('Error en la búsqueda');
+        }
+        
+        const suggestions = await response.json();
+        autocompleteState.currentRequest = null;
+        
+        showAutocompleteSuggestions(field, suggestions, query);
+        
+    } catch (error) {
+        if (error.name !== 'AbortError') {
+            console.error('Error obteniendo sugerencias:', error);
+            hideAutocomplete();
+        }
+    }
+}
+
+// Mostrar indicador de carga
+function showAutocompleteLoading(field) {
+    autocompleteState.currentField = field;
+    autocompleteState.isOpen = true;
+    
+    positionAutocomplete(field);
+    
+    autocompleteElements.container.innerHTML = `
+        <div class="autocomplete-loading">
+            Buscando sugerencias...
+        </div>
+    `;
+    
+    autocompleteElements.container.classList.add('show');
+}
+
+// Mostrar sugerencias
+function showAutocompleteSuggestions(field, suggestions, query) {
+    autocompleteState.currentField = field;
+    autocompleteState.suggestions = suggestions;
+    autocompleteState.selectedIndex = -1;
+    autocompleteState.isOpen = true;
+    
+    positionAutocomplete(field);
+    
+    if (suggestions.length === 0) {
+        autocompleteElements.container.innerHTML = `
+            <div class="autocomplete-no-results">
+                No se encontraron resultados para "${query}"
+            </div>
+        `;
+    } else {
+        autocompleteElements.container.innerHTML = suggestions.map((suggestion, index) => {
+            const highlightedText = highlightMatch(suggestion.text, query);
+            const typeLabel = getTypeLabel(suggestion.type);
+            
+            return `
+                <div class="autocomplete-item" data-index="${index}">
+                    <div class="autocomplete-text">${highlightedText}</div>
+                    <div class="autocomplete-type">${typeLabel}</div>
+                </div>
+            `;
+        }).join('');
+        
+        // Agregar event listeners a los items
+        autocompleteElements.container.querySelectorAll('.autocomplete-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const index = parseInt(item.dataset.index);
+                selectSuggestion(index);
+            });
+        });
+    }
+    
+    autocompleteElements.container.classList.add('show');
+}
+
+// Posicionar el dropdown de autocompletado
+function positionAutocomplete(field) {
+    const fieldRect = field.getBoundingClientRect();
+    const container = autocompleteElements.container;
+    
+    container.style.position = 'fixed';
+    container.style.top = `${fieldRect.bottom + 4}px`;
+    container.style.left = `${fieldRect.left}px`;
+    container.style.width = `${fieldRect.width}px`;
+    container.style.zIndex = '1001';
+}
+
+// Resaltar texto coincidente
+function highlightMatch(text, query) {
+    if (!query) return text;
+    
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    return text.replace(regex, '<span class="match">$1</span>');
+}
+
+// Obtener etiqueta del tipo de sugerencia
+function getTypeLabel(type) {
+    const labels = {
+        'empresa': 'EMPRESA',
+        'numero_parte': 'NÚMERO',
+        'laminacion': 'LAMINACIÓN',
+        'troquel': 'TROQUEL'
+    };
+    return labels[type] || type.toUpperCase();
+}
+
+// Manejar navegación con teclado
+function handleAutocompleteKeydown(e, field) {
+    if (!autocompleteState.isOpen || autocompleteState.suggestions.length === 0) {
+        return;
+    }
+    
+    switch (e.key) {
+        case 'ArrowDown':
+            e.preventDefault();
+            autocompleteState.selectedIndex = Math.min(
+                autocompleteState.selectedIndex + 1,
+                autocompleteState.suggestions.length - 1
+            );
+            updateSelectedItem();
+            break;
+            
+        case 'ArrowUp':
+            e.preventDefault();
+            autocompleteState.selectedIndex = Math.max(
+                autocompleteState.selectedIndex - 1,
+                -1
+            );
+            updateSelectedItem();
+            break;
+            
+        case 'Enter':
+            e.preventDefault();
+            if (autocompleteState.selectedIndex >= 0) {
+                selectSuggestion(autocompleteState.selectedIndex);
+            }
+            break;
+            
+        case 'Tab':
+            if (autocompleteState.selectedIndex >= 0) {
+                e.preventDefault();
+                selectSuggestion(autocompleteState.selectedIndex);
+            } else {
+                hideAutocomplete();
+            }
+            break;
+    }
+}
+
+// Actualizar item seleccionado visualmente
+function updateSelectedItem() {
+    const items = autocompleteElements.container.querySelectorAll('.autocomplete-item');
+    
+    items.forEach((item, index) => {
+        item.classList.toggle('highlighted', index === autocompleteState.selectedIndex);
+    });
+    
+    // Scroll al item seleccionado
+    if (autocompleteState.selectedIndex >= 0) {
+        const selectedItem = items[autocompleteState.selectedIndex];
+        if (selectedItem) {
+            selectedItem.scrollIntoView({ block: 'nearest' });
+        }
+    }
+}
+
+// Seleccionar una sugerencia
+function selectSuggestion(index) {
+    const suggestion = autocompleteState.suggestions[index];
+    if (!suggestion || !autocompleteState.currentField) return;
+    
+    autocompleteState.currentField.value = suggestion.text;
+    hideAutocomplete();
+    
+    // Trigger search si está configurado
+    if (autocompleteState.currentField.id !== 'texto-libre-filter') {
+        // Delay para permitir que el valor se actualice
+        setTimeout(() => {
+            handleSearch();
+        }, 100);
+    }
+    
+    // Notificación de selección
+    NotificationManager.success(
+        'Sugerencia seleccionada',
+        `${getTypeLabel(suggestion.type)}: ${suggestion.text}`,
+        2000
+    );
+}
+
+// Ocultar autocompletado
+function hideAutocomplete() {
+    autocompleteState.isOpen = false;
+    autocompleteState.currentField = null;
+    autocompleteState.suggestions = [];
+    autocompleteState.selectedIndex = -1;
+    
+    autocompleteElements.container.classList.remove('show');
+    
+    // Limpiar timer si existe
+    if (autocompleteState.debounceTimer) {
+        clearTimeout(autocompleteState.debounceTimer);
+        autocompleteState.debounceTimer = null;
+    }
+    
+    // Cancelar request si existe
+    if (autocompleteState.currentRequest) {
+        autocompleteState.currentRequest.abort();
+        autocompleteState.currentRequest = null;
+    }
 }

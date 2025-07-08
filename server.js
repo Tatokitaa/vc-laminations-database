@@ -80,14 +80,27 @@ app.get('/api/laminaciones', (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
+    
+    // Filtros
     const empresa = req.query.empresa;
     const numeroParte = req.query.numero_parte;
+    const laminacionVcl = req.query.laminacion_vcl;
+    const troquel = req.query.troquel;
+    const prensa = req.query.prensa;
+    const acero = req.query.acero;
+    const pesoMin = req.query.peso_min;
+    const pesoMax = req.query.peso_max;
+    const espesorMin = req.query.espesor_min;
+    const espesorMax = req.query.espesor_max;
+    const tipoAlambre = req.query.tipo_alambre;
+    const textoLibre = req.query.texto_libre;
     
     let query = 'SELECT * FROM laminaciones';
     let countQuery = 'SELECT COUNT(*) as total FROM laminaciones';
     let conditions = [];
     let params = [];
     
+    // Filtros específicos
     if (empresa) {
         conditions.push('empresa = ?');
         params.push(empresa);
@@ -96,6 +109,74 @@ app.get('/api/laminaciones', (req, res) => {
     if (numeroParte) {
         conditions.push('numero LIKE ?');
         params.push(`%${numeroParte}%`);
+    }
+    
+    if (laminacionVcl) {
+        conditions.push('laminacion_vcl LIKE ?');
+        params.push(`%${laminacionVcl}%`);
+    }
+    
+    if (troquel) {
+        conditions.push('troquel LIKE ?');
+        params.push(`%${troquel}%`);
+    }
+    
+    if (prensa) {
+        conditions.push('(prensa_1 LIKE ? OR prensa_2 LIKE ? OR prensa_3 LIKE ? OR prensa_4 LIKE ?)');
+        params.push(`%${prensa}%`, `%${prensa}%`, `%${prensa}%`, `%${prensa}%`);
+    }
+    
+    if (acero) {
+        conditions.push('(acero_1 LIKE ? OR acero_2 LIKE ? OR acero_3 LIKE ?)');
+        params.push(`%${acero}%`, `%${acero}%`, `%${acero}%`);
+    }
+    
+    if (pesoMin) {
+        conditions.push('peso_pieza_kg >= ?');
+        params.push(parseFloat(pesoMin));
+    }
+    
+    if (pesoMax) {
+        conditions.push('peso_pieza_kg <= ?');
+        params.push(parseFloat(pesoMax));
+    }
+    
+    if (espesorMin) {
+        conditions.push('espesor_pulg >= ?');
+        params.push(parseFloat(espesorMin));
+    }
+    
+    if (espesorMax) {
+        conditions.push('espesor_pulg <= ?');
+        params.push(parseFloat(espesorMax));
+    }
+    
+    if (tipoAlambre) {
+        conditions.push('tipo_alambre LIKE ?');
+        params.push(`%${tipoAlambre}%`);
+    }
+    
+    // Búsqueda por texto libre en múltiples campos
+    if (textoLibre) {
+        conditions.push(`(
+            empresa LIKE ? OR 
+            numero LIKE ? OR 
+            laminacion_vcl LIKE ? OR 
+            troquel LIKE ? OR 
+            prensa_1 LIKE ? OR 
+            prensa_2 LIKE ? OR 
+            prensa_3 LIKE ? OR 
+            prensa_4 LIKE ? OR 
+            acero_1 LIKE ? OR 
+            acero_2 LIKE ? OR 
+            acero_3 LIKE ? OR 
+            tipo_alambre LIKE ? OR 
+            caracteristica_especial LIKE ?
+        )`);
+        const textoPattern = `%${textoLibre}%`;
+        for (let i = 0; i < 13; i++) {
+            params.push(textoPattern);
+        }
     }
     
     if (conditions.length > 0) {
@@ -115,6 +196,7 @@ app.get('/api/laminaciones', (req, res) => {
         }
         
         const total = countResult[0].total;
+        const totalPages = Math.ceil(total / limit);
         
         // Obtener registros paginados
         db.query(query, params, (err, results) => {
@@ -126,10 +208,12 @@ app.get('/api/laminaciones', (req, res) => {
             res.json({
                 data: results,
                 pagination: {
-                    page,
+                    currentPage: page,
                     limit,
-                    total,
-                    totalPages: Math.ceil(total / limit)
+                    totalItems: total,
+                    totalPages,
+                    startItem: offset + 1,
+                    endItem: Math.min(offset + limit, total)
                 }
             });
         });
@@ -367,6 +451,530 @@ app.post('/api/laminaciones', (req, res) => {
                 empresa: empresa
             });
         });
+    });
+});
+
+// Endpoint para obtener opciones de filtros
+app.get('/api/filter-options', (req, res) => {
+    const queries = {
+        prensas: `
+            SELECT DISTINCT prensa_1 as prensa FROM laminaciones WHERE prensa_1 IS NOT NULL AND prensa_1 != ''
+            UNION
+            SELECT DISTINCT prensa_2 as prensa FROM laminaciones WHERE prensa_2 IS NOT NULL AND prensa_2 != ''
+            UNION
+            SELECT DISTINCT prensa_3 as prensa FROM laminaciones WHERE prensa_3 IS NOT NULL AND prensa_3 != ''
+            UNION
+            SELECT DISTINCT prensa_4 as prensa FROM laminaciones WHERE prensa_4 IS NOT NULL AND prensa_4 != ''
+            ORDER BY prensa
+        `,
+        aceros: `
+            SELECT DISTINCT acero_1 as acero FROM laminaciones WHERE acero_1 IS NOT NULL AND acero_1 != ''
+            UNION
+            SELECT DISTINCT acero_2 as acero FROM laminaciones WHERE acero_2 IS NOT NULL AND acero_2 != ''
+            UNION
+            SELECT DISTINCT acero_3 as acero FROM laminaciones WHERE acero_3 IS NOT NULL AND acero_3 != ''
+            ORDER BY acero
+        `,
+        alambres: `
+            SELECT DISTINCT tipo_alambre as alambre FROM laminaciones 
+            WHERE tipo_alambre IS NOT NULL AND tipo_alambre != ''
+            ORDER BY alambre
+        `
+    };
+    
+    let results = {};
+    let completed = 0;
+    
+    Object.keys(queries).forEach(key => {
+        db.query(queries[key], (err, result) => {
+            if (err) {
+                console.error(`Error en query ${key}:`, err);
+                results[key] = [];
+            } else {
+                results[key] = result.map(row => row[key.slice(0, -1)]);
+            }
+            
+            completed++;
+            if (completed === Object.keys(queries).length) {
+                res.json(results);
+            }
+        });
+    });
+});
+
+// Endpoint para contar registros con filtros
+app.get('/api/laminaciones/count', (req, res) => {
+    // Filtros
+    const empresa = req.query.empresa;
+    const numeroParte = req.query.numero_parte;
+    const laminacionVcl = req.query.laminacion_vcl;
+    const troquel = req.query.troquel;
+    const prensa = req.query.prensa;
+    const acero = req.query.acero;
+    const pesoMin = req.query.peso_min;
+    const pesoMax = req.query.peso_max;
+    const espesorMin = req.query.espesor_min;
+    const espesorMax = req.query.espesor_max;
+    const tipoAlambre = req.query.tipo_alambre;
+    const textoLibre = req.query.texto_libre;
+    
+    let countQuery = 'SELECT COUNT(*) as total FROM laminaciones';
+    let conditions = [];
+    let params = [];
+    
+    // Aplicar los mismos filtros que en el endpoint principal
+    if (empresa) {
+        conditions.push('empresa = ?');
+        params.push(empresa);
+    }
+    
+    if (numeroParte) {
+        conditions.push('numero LIKE ?');
+        params.push(`%${numeroParte}%`);
+    }
+    
+    if (laminacionVcl) {
+        conditions.push('laminacion_vcl LIKE ?');
+        params.push(`%${laminacionVcl}%`);
+    }
+    
+    if (troquel) {
+        conditions.push('troquel LIKE ?');
+        params.push(`%${troquel}%`);
+    }
+    
+    if (prensa) {
+        conditions.push('(prensa_1 LIKE ? OR prensa_2 LIKE ? OR prensa_3 LIKE ? OR prensa_4 LIKE ?)');
+        params.push(`%${prensa}%`, `%${prensa}%`, `%${prensa}%`, `%${prensa}%`);
+    }
+    
+    if (acero) {
+        conditions.push('(acero_1 LIKE ? OR acero_2 LIKE ? OR acero_3 LIKE ?)');
+        params.push(`%${acero}%`, `%${acero}%`, `%${acero}%`);
+    }
+    
+    if (pesoMin) {
+        conditions.push('peso_pieza_kg >= ?');
+        params.push(parseFloat(pesoMin));
+    }
+    
+    if (pesoMax) {
+        conditions.push('peso_pieza_kg <= ?');
+        params.push(parseFloat(pesoMax));
+    }
+    
+    if (espesorMin) {
+        conditions.push('espesor_pulg >= ?');
+        params.push(parseFloat(espesorMin));
+    }
+    
+    if (espesorMax) {
+        conditions.push('espesor_pulg <= ?');
+        params.push(parseFloat(espesorMax));
+    }
+    
+    if (tipoAlambre) {
+        conditions.push('tipo_alambre LIKE ?');
+        params.push(`%${tipoAlambre}%`);
+    }
+    
+    if (textoLibre) {
+        conditions.push(`(
+            empresa LIKE ? OR 
+            numero LIKE ? OR 
+            laminacion_vcl LIKE ? OR 
+            troquel LIKE ? OR 
+            prensa_1 LIKE ? OR 
+            prensa_2 LIKE ? OR 
+            prensa_3 LIKE ? OR 
+            prensa_4 LIKE ? OR 
+            acero_1 LIKE ? OR 
+            acero_2 LIKE ? OR 
+            acero_3 LIKE ? OR 
+            tipo_alambre LIKE ? OR 
+            caracteristica_especial LIKE ?
+        )`);
+        const textoPattern = `%${textoLibre}%`;
+        for (let i = 0; i < 13; i++) {
+            params.push(textoPattern);
+        }
+    }
+    
+    if (conditions.length > 0) {
+        countQuery += ' WHERE ' + conditions.join(' AND ');
+    }
+    
+    db.query(countQuery, params, (err, results) => {
+        if (err) {
+            console.error('Error contando registros:', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+        
+        res.json({
+            count: results[0].total
+        });
+    });
+});
+
+// Endpoint para exportar datos
+app.get('/api/laminaciones/export', (req, res) => {
+    const format = req.query.format || 'csv';
+    const includeHeaders = req.query.includeHeaders === 'true';
+    const includeAllFields = req.query.includeAllFields === 'true';
+    const includeFiltersInfo = req.query.includeFiltersInfo === 'true';
+    
+    // Aplicar los mismos filtros que en el endpoint principal
+    const empresa = req.query.empresa;
+    const numeroParte = req.query.numero_parte;
+    const laminacionVcl = req.query.laminacion_vcl;
+    const troquel = req.query.troquel;
+    const prensa = req.query.prensa;
+    const acero = req.query.acero;
+    const pesoMin = req.query.peso_min;
+    const pesoMax = req.query.peso_max;
+    const espesorMin = req.query.espesor_min;
+    const espesorMax = req.query.espesor_max;
+    const tipoAlambre = req.query.tipo_alambre;
+    const textoLibre = req.query.texto_libre;
+    
+    // Construir query
+    let query = includeAllFields ? 
+        'SELECT * FROM laminaciones' :
+        'SELECT empresa, numero, laminacion_vcl, troquel, prensa_1, peso_pieza_kg FROM laminaciones';
+    
+    let conditions = [];
+    let params = [];
+    
+    // Aplicar filtros
+    if (empresa) {
+        conditions.push('empresa = ?');
+        params.push(empresa);
+    }
+    
+    if (numeroParte) {
+        conditions.push('numero LIKE ?');
+        params.push(`%${numeroParte}%`);
+    }
+    
+    if (laminacionVcl) {
+        conditions.push('laminacion_vcl LIKE ?');
+        params.push(`%${laminacionVcl}%`);
+    }
+    
+    if (troquel) {
+        conditions.push('troquel LIKE ?');
+        params.push(`%${troquel}%`);
+    }
+    
+    if (prensa) {
+        conditions.push('(prensa_1 LIKE ? OR prensa_2 LIKE ? OR prensa_3 LIKE ? OR prensa_4 LIKE ?)');
+        params.push(`%${prensa}%`, `%${prensa}%`, `%${prensa}%`, `%${prensa}%`);
+    }
+    
+    if (acero) {
+        conditions.push('(acero_1 LIKE ? OR acero_2 LIKE ? OR acero_3 LIKE ?)');
+        params.push(`%${acero}%`, `%${acero}%`, `%${acero}%`);
+    }
+    
+    if (pesoMin) {
+        conditions.push('peso_pieza_kg >= ?');
+        params.push(parseFloat(pesoMin));
+    }
+    
+    if (pesoMax) {
+        conditions.push('peso_pieza_kg <= ?');
+        params.push(parseFloat(pesoMax));
+    }
+    
+    if (espesorMin) {
+        conditions.push('espesor_pulg >= ?');
+        params.push(parseFloat(espesorMin));
+    }
+    
+    if (espesorMax) {
+        conditions.push('espesor_pulg <= ?');
+        params.push(parseFloat(espesorMax));
+    }
+    
+    if (tipoAlambre) {
+        conditions.push('tipo_alambre LIKE ?');
+        params.push(`%${tipoAlambre}%`);
+    }
+    
+    if (textoLibre) {
+        conditions.push(`(
+            empresa LIKE ? OR 
+            numero LIKE ? OR 
+            laminacion_vcl LIKE ? OR 
+            troquel LIKE ? OR 
+            prensa_1 LIKE ? OR 
+            prensa_2 LIKE ? OR 
+            prensa_3 LIKE ? OR 
+            prensa_4 LIKE ? OR 
+            acero_1 LIKE ? OR 
+            acero_2 LIKE ? OR 
+            acero_3 LIKE ? OR 
+            tipo_alambre LIKE ? OR 
+            caracteristica_especial LIKE ?
+        )`);
+        const textoPattern = `%${textoLibre}%`;
+        for (let i = 0; i < 13; i++) {
+            params.push(textoPattern);
+        }
+    }
+    
+    if (conditions.length > 0) {
+        query += ' WHERE ' + conditions.join(' AND ');
+    }
+    
+    query += ' ORDER BY empresa, numero';
+    
+    db.query(query, params, (err, results) => {
+        if (err) {
+            console.error('Error en exportación:', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+        
+        if (format === 'csv') {
+            // Generar CSV
+            let csvContent = '';
+            
+            // Información de filtros si se solicita
+            if (includeFiltersInfo) {
+                csvContent += '# Reporte de Laminaciones - VC Laminations\n';
+                csvContent += `# Generado el: ${new Date().toLocaleDateString()}\n`;
+                csvContent += `# Total de registros: ${results.length}\n`;
+                
+                const activeFilters = [];
+                if (empresa) activeFilters.push(`Empresa: ${empresa}`);
+                if (numeroParte) activeFilters.push(`Número de Parte: ${numeroParte}`);
+                if (laminacionVcl) activeFilters.push(`Laminación VC: ${laminacionVcl}`);
+                if (troquel) activeFilters.push(`Troquel: ${troquel}`);
+                if (prensa) activeFilters.push(`Prensa: ${prensa}`);
+                if (acero) activeFilters.push(`Material: ${acero}`);
+                if (pesoMin) activeFilters.push(`Peso Mínimo: ${pesoMin} kg`);
+                if (pesoMax) activeFilters.push(`Peso Máximo: ${pesoMax} kg`);
+                if (espesorMin) activeFilters.push(`Espesor Mínimo: ${espesorMin} pulg`);
+                if (espesorMax) activeFilters.push(`Espesor Máximo: ${espesorMax} pulg`);
+                if (tipoAlambre) activeFilters.push(`Tipo Alambre: ${tipoAlambre}`);
+                if (textoLibre) activeFilters.push(`Búsqueda Libre: ${textoLibre}`);
+                
+                if (activeFilters.length > 0) {
+                    csvContent += `# Filtros aplicados: ${activeFilters.join(', ')}\n`;
+                } else {
+                    csvContent += '# Sin filtros aplicados\n';
+                }
+                csvContent += '\n';
+            }
+            
+            // Encabezados
+            if (includeHeaders && results.length > 0) {
+                csvContent += Object.keys(results[0]).join(',') + '\n';
+            }
+            
+            // Datos
+            results.forEach(row => {
+                const values = Object.values(row).map(value => {
+                    if (value === null || value === undefined) {
+                        return '';
+                    }
+                    // Escapar comillas y envolver en comillas si contiene comas
+                    const stringValue = String(value);
+                    if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
+                        return `"${stringValue.replace(/"/g, '""')}"`;
+                    }
+                    return stringValue;
+                });
+                csvContent += values.join(',') + '\n';
+            });
+            
+            res.setHeader('Content-Type', 'text/csv');
+            res.setHeader('Content-Disposition', `attachment; filename=laminaciones_${new Date().toISOString().split('T')[0]}.csv`);
+            res.send(csvContent);
+            
+        } else if (format === 'pdf') {
+            // Para PDF, retornar JSON con los datos (el frontend manejará la generación del PDF)
+            res.json({
+                data: results,
+                meta: {
+                    totalRecords: results.length,
+                    generatedAt: new Date().toISOString(),
+                    filters: {
+                        empresa,
+                        numeroParte,
+                        laminacionVcl,
+                        troquel,
+                        prensa,
+                        acero,
+                        pesoMin,
+                        pesoMax,
+                        espesorMin,
+                        espesorMax,
+                        tipoAlambre,
+                        textoLibre
+                    }
+                }
+            });
+        } else {
+            res.status(400).json({ error: 'Formato no soportado' });
+        }
+    });
+});
+
+// ========================================
+// ENDPOINTS DE AUTOCOMPLETADO
+// ========================================
+
+// Endpoint para autocompletado de empresas
+app.get('/api/autocomplete/empresas', (req, res) => {
+    const query = req.query.q;
+    if (!query || query.length < 2) {
+        return res.json([]);
+    }
+    
+    const searchQuery = `
+        SELECT DISTINCT empresa 
+        FROM laminaciones 
+        WHERE empresa LIKE ? 
+        ORDER BY empresa 
+        LIMIT 10
+    `;
+    
+    db.query(searchQuery, [`%${query}%`], (err, results) => {
+        if (err) {
+            console.error('Error en autocompletado de empresas:', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+        
+        const suggestions = results.map(row => ({
+            text: row.empresa,
+            type: 'empresa'
+        }));
+        
+        res.json(suggestions);
+    });
+});
+
+// Endpoint para autocompletado de números de parte
+app.get('/api/autocomplete/numeros-parte', (req, res) => {
+    const query = req.query.q;
+    if (!query || query.length < 2) {
+        return res.json([]);
+    }
+    
+    const searchQuery = `
+        SELECT DISTINCT numero_parte, empresa 
+        FROM laminaciones 
+        WHERE numero_parte LIKE ? 
+        ORDER BY numero_parte 
+        LIMIT 10
+    `;
+    
+    db.query(searchQuery, [`%${query}%`], (err, results) => {
+        if (err) {
+            console.error('Error en autocompletado de números de parte:', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+        
+        const suggestions = results.map(row => ({
+            text: row.numero_parte,
+            type: 'numero_parte',
+            empresa: row.empresa
+        }));
+        
+        res.json(suggestions);
+    });
+});
+
+// Endpoint para autocompletado de laminaciones VCL
+app.get('/api/autocomplete/laminaciones', (req, res) => {
+    const query = req.query.q;
+    if (!query || query.length < 2) {
+        return res.json([]);
+    }
+    
+    const searchQuery = `
+        SELECT DISTINCT laminacion_vcl, empresa 
+        FROM laminaciones 
+        WHERE laminacion_vcl LIKE ? 
+        ORDER BY laminacion_vcl 
+        LIMIT 10
+    `;
+    
+    db.query(searchQuery, [`%${query}%`], (err, results) => {
+        if (err) {
+            console.error('Error en autocompletado de laminaciones:', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+        
+        const suggestions = results.map(row => ({
+            text: row.laminacion_vcl,
+            type: 'laminacion',
+            empresa: row.empresa
+        }));
+        
+        res.json(suggestions);
+    });
+});
+
+// Endpoint para autocompletado de troqueles
+app.get('/api/autocomplete/troqueles', (req, res) => {
+    const query = req.query.q;
+    if (!query || query.length < 2) {
+        return res.json([]);
+    }
+    
+    const searchQuery = `
+        SELECT DISTINCT troquel, empresa 
+        FROM laminaciones 
+        WHERE troquel LIKE ? AND troquel IS NOT NULL AND troquel != ''
+        ORDER BY troquel 
+        LIMIT 10
+    `;
+    
+    db.query(searchQuery, [`%${query}%`], (err, results) => {
+        if (err) {
+            console.error('Error en autocompletado de troqueles:', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+        
+        const suggestions = results.map(row => ({
+            text: row.troquel,
+            type: 'troquel',
+            empresa: row.empresa
+        }));
+        
+        res.json(suggestions);
+    });
+});
+
+// Endpoint para autocompletado de búsqueda libre (múltiples campos)
+app.get('/api/autocomplete/busqueda-libre', (req, res) => {
+    const query = req.query.q;
+    if (!query || query.length < 2) {
+        return res.json([]);
+    }
+    
+    const searchQuery = `
+        (SELECT DISTINCT empresa as text, 'empresa' as type, empresa FROM laminaciones WHERE empresa LIKE ? LIMIT 3)
+        UNION
+        (SELECT DISTINCT numero_parte as text, 'numero_parte' as type, empresa FROM laminaciones WHERE numero_parte LIKE ? LIMIT 3)
+        UNION
+        (SELECT DISTINCT laminacion_vcl as text, 'laminacion' as type, empresa FROM laminaciones WHERE laminacion_vcl LIKE ? LIMIT 3)
+        UNION
+        (SELECT DISTINCT troquel as text, 'troquel' as type, empresa FROM laminaciones WHERE troquel LIKE ? AND troquel IS NOT NULL AND troquel != '' LIMIT 3)
+        ORDER BY text
+        LIMIT 10
+    `;
+    
+    const searchTerm = `%${query}%`;
+    db.query(searchQuery, [searchTerm, searchTerm, searchTerm, searchTerm], (err, results) => {
+        if (err) {
+            console.error('Error en autocompletado de búsqueda libre:', err);
+            return res.status(500).json({ error: 'Error interno del servidor' });
+        }
+        
+        res.json(results);
     });
 });
 

@@ -61,6 +61,7 @@
 
         <!-- Filtros de búsqueda -->
         <div class="search-panel">
+            <!-- Fila principal de filtros -->
             <div class="search-row">
                 <div class="search-field">
                     <label for="empresa-filter">Empresa:</label>
@@ -72,13 +73,99 @@
                     <label for="numero-parte-filter">Número de Parte:</label>
                     <input type="text" id="numero-parte-filter" placeholder="Buscar por número de parte...">
                 </div>
+                <div class="search-field">
+                    <label for="laminacion-filter">Laminación VC:</label>
+                    <input type="text" id="laminacion-filter" placeholder="Filtrar por laminación...">
+                </div>
+                <div class="search-field">
+                    <label for="troquel-filter">Troquel:</label>
+                    <input type="text" id="troquel-filter" placeholder="Filtrar por troquel...">
+                </div>
+            </div>
+            
+            <!-- Fila de filtros avanzados (colapsable) -->
+            <div class="advanced-filters" id="advanced-filters">
+                <div class="search-row">
+                    <div class="search-field">
+                        <label for="prensa-filter">Prensa:</label>
+                        <select id="prensa-filter">
+                            <option value="">Todas las prensas</option>
+                        </select>
+                    </div>
+                    <div class="search-field">
+                        <label for="acero-filter">Material (Acero):</label>
+                        <select id="acero-filter">
+                            <option value="">Todos los materiales</option>
+                        </select>
+                    </div>
+                    <div class="search-field">
+                        <label for="peso-min-filter">Peso Mín. (kg):</label>
+                        <input type="number" id="peso-min-filter" step="0.001" placeholder="0.000">
+                    </div>
+                    <div class="search-field">
+                        <label for="peso-max-filter">Peso Máx. (kg):</label>
+                        <input type="number" id="peso-max-filter" step="0.001" placeholder="999.999">
+                    </div>
+                </div>
+                
+                <div class="search-row">
+                    <div class="search-field">
+                        <label for="espesor-min-filter">Espesor Mín. (pulg.):</label>
+                        <input type="number" id="espesor-min-filter" step="0.000001" placeholder="0.000000">
+                    </div>
+                    <div class="search-field">
+                        <label for="espesor-max-filter">Espesor Máx. (pulg.):</label>
+                        <input type="number" id="espesor-max-filter" step="0.000001" placeholder="9.999999">
+                    </div>
+                    <div class="search-field">
+                        <label for="alambre-filter">Tipo de Alambre:</label>
+                        <select id="alambre-filter">
+                            <option value="">Todos los tipos</option>
+                        </select>
+                    </div>
+                    <div class="search-field">
+                        <label for="texto-libre-filter">Búsqueda Libre:</label>
+                        <input type="text" id="texto-libre-filter" placeholder="Buscar en todos los campos...">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Controles de filtros -->
+            <div class="filter-controls">
+                <div class="filter-toggle">
+                    <button id="advanced-toggle" class="toggle-btn">
+                        <span class="toggle-text">Mostrar Filtros Avanzados</span>
+                        <span class="toggle-icon">▼</span>
+                    </button>
+                </div>
                 <div class="search-buttons">
                     <button id="search-btn">Buscar</button>
-                    <button id="clear-btn">Limpiar</button>
+                    <button id="clear-btn">Limpiar Filtros</button>
+                    <button id="save-search-btn" title="Guardar búsqueda actual">💾</button>
+                    <button id="load-search-btn" title="Cargar búsqueda guardada">📂</button>
+                </div>
+                <div class="action-buttons">
+                    <button id="export-btn" title="Exportar resultados">📊 Exportar</button>
                     <button id="production-btn">Registrar Producción</button>
                     <button id="new-lamination-btn">Nueva Laminación</button>
                 </div>
             </div>
+            
+            <!-- Filtros activos -->
+            <div class="active-filters" id="active-filters">
+                <div class="active-filters-header">
+                    <span>Filtros Activos:</span>
+                    <button id="clear-all-filters" class="clear-all-btn">Limpiar Todos</button>
+                </div>
+                <div class="active-filters-list" id="active-filters-list">
+                    <!-- Se mostrarán aquí los filtros activos -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Contador de resultados -->
+        <div class="results-counter">
+            <span id="results-count">0 resultados encontrados</span>
         </div>
 
         <!-- Información de paginación -->
@@ -127,7 +214,7 @@
         <!-- Modal para registrar producción -->
         <div id="production-modal" class="modal">
             <div class="modal-content">
-                <span class="close-production">&times;</span>
+                <span class="close close-production">&times;</span>
                 <h2>Registrar Producción</h2>
                 <form id="production-form">
                     <div class="form-group">
@@ -170,281 +257,193 @@
                 <span class="close close-new-lamination">&times;</span>
                 <h2>Nueva Laminación</h2>
                 <form id="new-lamination-form">
-                    <!-- Información Básica -->
-                    <div class="form-section">
-                        <h3>Información Básica</h3>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="new-empresa">Empresa: *</label>
-                                <select id="new-empresa" required>
-                                    <option value="">Seleccionar empresa</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="new-numero-parte">Número de Parte: *</label>
-                                <input type="text" id="new-numero-parte" required>
-                            </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="new-empresa">Empresa:</label>
+                            <select id="new-empresa" required>
+                                <option value="">Seleccionar empresa</option>
+                            </select>
                         </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="new-descripcion-cliente">Descripción del Cliente:</label>
-                                <input type="text" id="new-descripcion-cliente">
-                            </div>
-                            <div class="form-group">
-                                <label for="new-nivel-revision">Nivel de Revisión:</label>
-                                <input type="text" id="new-nivel-revision">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="new-laminacion-vcl">Laminación VCL:</label>
-                                <input type="text" id="new-laminacion-vcl">
-                            </div>
-                            <div class="form-group">
-                                <label for="new-referencia">Referencia:</label>
-                                <input type="text" id="new-referencia">
-                            </div>
+                        <div class="form-group">
+                            <label for="new-numero-parte">Número de Parte:</label>
+                            <input type="text" id="new-numero-parte" required>
                         </div>
                     </div>
-
-                    <!-- Información de Troquel -->
-                    <div class="form-section">
-                        <h3>Información de Troquel</h3>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="new-troquel">Troquel:</label>
-                                <input type="text" id="new-troquel">
-                            </div>
-                            <div class="form-group">
-                                <label for="new-paso-troquel">Paso Troquel (mm):</label>
-                                <input type="number" id="new-paso-troquel" step="0.01">
-                            </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="new-descripcion-cliente">Descripción del Cliente:</label>
+                            <input type="text" id="new-descripcion-cliente">
+                        </div>
+                        <div class="form-group">
+                            <label for="new-nivel-revision">Nivel de Revisión:</label>
+                            <input type="text" id="new-nivel-revision">
                         </div>
                     </div>
-
-                    <!-- Información de Prensas -->
-                    <div class="form-section">
-                        <h3>Configuración de Prensas</h3>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="new-prensa-1">Prensa 1:</label>
-                                <input type="text" id="new-prensa-1">
-                            </div>
-                            <div class="form-group">
-                                <label for="new-placas-paralelas">Placas/Paralelas:</label>
-                                <input type="text" id="new-placas-paralelas">
-                            </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="new-laminacion-vcl">Laminación VCL:</label>
+                            <input type="text" id="new-laminacion-vcl" required>
                         </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="new-stackers">Stackers:</label>
-                                <input type="text" id="new-stackers">
-                            </div>
-                            <div class="form-group">
-                                <label for="new-bandas">Bandas:</label>
-                                <input type="text" id="new-bandas">
-                            </div>
-                        </div>
-                        
-                        <!-- Prensa 2 -->
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="new-prensa-2">Prensa 2:</label>
-                                <input type="text" id="new-prensa-2">
-                            </div>
-                            <div class="form-group">
-                                <label for="new-placas-paralelas-2">Placas/Paralelas 2:</label>
-                                <input type="text" id="new-placas-paralelas-2">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="new-stackers-2">Stackers 2:</label>
-                                <input type="text" id="new-stackers-2">
-                            </div>
-                            <div class="form-group">
-                                <label for="new-bandas-2">Bandas 2:</label>
-                                <input type="text" id="new-bandas-2">
-                            </div>
-                        </div>
-                        
-                        <!-- Prensa 3 -->
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="new-prensa-3">Prensa 3:</label>
-                                <input type="text" id="new-prensa-3">
-                            </div>
-                            <div class="form-group">
-                                <label for="new-placas-paralelas-3">Placas/Paralelas 3:</label>
-                                <input type="text" id="new-placas-paralelas-3">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="new-stackers-3">Stackers 3:</label>
-                                <input type="text" id="new-stackers-3">
-                            </div>
-                            <div class="form-group">
-                                <label for="new-bandas-3">Bandas 3:</label>
-                                <input type="text" id="new-bandas-3">
-                            </div>
-                        </div>
-                        
-                        <!-- Prensa 4 -->
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="new-prensa-4">Prensa 4:</label>
-                                <input type="text" id="new-prensa-4">
-                            </div>
-                            <div class="form-group">
-                                <label for="new-placas-paralelas-4">Placas/Paralelas 4:</label>
-                                <input type="text" id="new-placas-paralelas-4">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="new-stackers-4">Stackers 4:</label>
-                                <input type="text" id="new-stackers-4">
-                            </div>
-                            <div class="form-group">
-                                <label for="new-bandas-4">Bandas 4:</label>
-                                <input type="text" id="new-bandas-4">
-                            </div>
+                        <div class="form-group">
+                            <label for="new-referencia">Referencia:</label>
+                            <input type="text" id="new-referencia">
                         </div>
                     </div>
-
-                    <!-- Información de Material -->
-                    <div class="form-section">
-                        <h3>Especificaciones de Material</h3>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="new-acero-1">Acero 1:</label>
-                                <input type="text" id="new-acero-1">
-                            </div>
-                            <div class="form-group">
-                                <label for="new-acero-2">Acero 2:</label>
-                                <input type="text" id="new-acero-2">
-                            </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="new-troquel">Troquel:</label>
+                            <input type="text" id="new-troquel">
                         </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="new-acero-3">Acero 3:</label>
-                                <input type="text" id="new-acero-3">
-                            </div>
-                            <div class="form-group">
-                                <label for="new-horneado">Horneado:</label>
-                                <input type="text" id="new-horneado">
-                            </div>
+                        <div class="form-group">
+                            <label for="new-paso-troquel">Paso Troquel (mm):</label>
+                            <input type="number" id="new-paso-troquel" step="0.01">
                         </div>
                     </div>
-
-                    <!-- Dimensiones -->
-                    <div class="form-section">
-                        <h3>Dimensiones y Pesos</h3>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="new-espesor-pulg">Espesor (pulg.):</label>
-                                <input type="number" id="new-espesor-pulg" step="0.000001">
-                            </div>
-                            <div class="form-group">
-                                <label for="new-ancho-cinta">Ancho Cinta (pulg.):</label>
-                                <input type="number" id="new-ancho-cinta" step="0.001">
-                            </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="new-prensa-1">Prensa 1:</label>
+                            <input type="text" id="new-prensa-1">
                         </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="new-peso-pieza">Peso por Pieza (kg):</label>
-                                <input type="number" id="new-peso-pieza" step="0.000001">
-                            </div>
-                            <div class="form-group">
-                                <!-- Campo movido a sección de alambre -->
-                            </div>
+                        <div class="form-group">
+                            <label for="new-prensa-2">Prensa 2:</label>
+                            <input type="text" id="new-prensa-2">
                         </div>
                     </div>
-
-                    <!-- Información de Alambre (Unidad de Agrupación) -->
-                    <div class="form-section">
-                        <h3>Configuración de Alambre (Unidad de Agrupación)</h3>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="new-long-corte-alambre">Long. Corte de Alambre:</label>
-                                <input type="number" id="new-long-corte-alambre" step="0.01">
-                            </div>
-                            <div class="form-group">
-                                <label for="new-cal-alambre">Calibre de Alambre:</label>
-                                <input type="text" id="new-cal-alambre">
-                            </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="new-prensa-3">Prensa 3:</label>
+                            <input type="text" id="new-prensa-3">
                         </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="new-tipo-alambre">Tipo de Alambre:</label>
-                                <input type="text" id="new-tipo-alambre">
-                            </div>
-                            <div class="form-group">
-                                <label for="new-lubricante">Lubricante:</label>
-                                <input type="text" id="new-lubricante">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="new-long-alambre-stack">Long. Alambre/Stack Final (pulg.):</label>
-                                <input type="number" id="new-long-alambre-stack" step="0.01">
-                            </div>
-                            <div class="form-group">
-                                <label for="new-piezas-alambre">Piezas por Alambre (unidad):</label>
-                                <input type="number" id="new-piezas-alambre">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="new-peso-alambre">Peso de un Alambre (kg):</label>
-                                <input type="number" id="new-peso-alambre" step="0.000001">
-                            </div>
-                            <div class="form-group">
-                                <label for="new-alambres-caja">Alambres por Caja:</label>
-                                <input type="number" id="new-alambres-caja">
-                            </div>
+                        <div class="form-group">
+                            <label for="new-prensa-4">Prensa 4:</label>
+                            <input type="text" id="new-prensa-4">
                         </div>
                     </div>
-
-                    <!-- Información de Empaque y Distribución -->
-                    <div class="form-section">
-                        <h3>Información de Empaque y Distribución</h3>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="new-tamano-caja">Tamaño de Caja:</label>
-                                <input type="text" id="new-tamano-caja">
-                            </div>
-                            <div class="form-group">
-                                <!-- Campo movido a sección de alambre -->
-                            </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="new-acero-1">Acero 1:</label>
+                            <input type="text" id="new-acero-1">
                         </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="new-tamano-tarima">Tamaño de Tarima:</label>
-                                <input type="text" id="new-tamano-tarima">
-                            </div>
-                            <div class="form-group">
-                                <label for="new-tipo-tarima">Tipo de Tarima:</label>
-                                <input type="text" id="new-tipo-tarima">
-                            </div>
+                        <div class="form-group">
+                            <label for="new-acero-2">Acero 2:</label>
+                            <input type="text" id="new-acero-2">
                         </div>
                     </div>
-
-                    <!-- Características Especiales -->
-                    <div class="form-section">
-                        <h3>Características Especiales</h3>
-                        <div class="form-group full-width">
-                            <label for="new-caracteristica-especial">Característica Especial:</label>
-                            <textarea id="new-caracteristica-especial" rows="3"></textarea>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="new-acero-3">Acero 3:</label>
+                            <input type="text" id="new-acero-3">
+                        </div>
+                        <div class="form-group">
+                            <label for="new-horneado">Horneado:</label>
+                            <input type="text" id="new-horneado">
                         </div>
                     </div>
-
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="new-espesor-pulg">Espesor (pulg):</label>
+                            <input type="number" id="new-espesor-pulg" step="0.000001">
+                        </div>
+                        <div class="form-group">
+                            <label for="new-peso-pieza">Peso Pieza (kg):</label>
+                            <input type="number" id="new-peso-pieza" step="0.001">
+                        </div>
+                    </div>
+                    
                     <div class="form-buttons">
                         <button type="submit">Crear Laminación</button>
-                        <button type="button" id="cancel-new-lamination">Cancelar</button>
+                        <button type="button" id="cancel-new-laminacion">Cancelar</button>
                     </div>
                 </form>
+            </div>
+        </div>
+
+        <!-- Modal Búsquedas Guardadas -->
+        <div id="saved-searches-modal" class="modal">
+            <div class="modal-content">
+                <span class="close close-saved-searches">&times;</span>
+                <h2>Búsquedas Guardadas</h2>
+                <div class="saved-searches-content">
+                    <div class="save-search-section">
+                        <h3>Guardar Búsqueda Actual</h3>
+                        <div class="form-group">
+                            <label for="search-name">Nombre de la búsqueda:</label>
+                            <input type="text" id="search-name" placeholder="Ej: Laminaciones EMERSON pesadas">
+                        </div>
+                        <div class="form-group">
+                            <label for="search-description">Descripción (opcional):</label>
+                            <textarea id="search-description" rows="2" placeholder="Descripción de la búsqueda..."></textarea>
+                        </div>
+                        <button id="save-current-search" class="btn-primary">Guardar Búsqueda</button>
+                    </div>
+                    
+                    <div class="load-search-section">
+                        <h3>Cargar Búsqueda</h3>
+                        <div class="saved-searches-list" id="saved-searches-list">
+                            <!-- Se mostrarán aquí las búsquedas guardadas -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Exportar -->
+        <div id="export-modal" class="modal">
+            <div class="modal-content">
+                <span class="close close-export">&times;</span>
+                <h2>Exportar Resultados</h2>
+                <div class="export-content">
+                    <div class="export-options">
+                        <h3>Formato de Exportación</h3>
+                        <div class="export-format">
+                            <label>
+                                <input type="radio" name="export-format" value="csv" checked>
+                                <span>CSV (Excel)</span>
+                            </label>
+                            <label>
+                                <input type="radio" name="export-format" value="pdf">
+                                <span>PDF</span>
+                            </label>
+                        </div>
+                        
+                        <h3>Opciones de Exportación</h3>
+                        <div class="export-settings">
+                            <label>
+                                <input type="checkbox" id="include-headers" checked>
+                                <span>Incluir encabezados</span>
+                            </label>
+                            <label>
+                                <input type="checkbox" id="include-all-fields">
+                                <span>Incluir todos los campos (no solo los visibles)</span>
+                            </label>
+                            <label>
+                                <input type="checkbox" id="include-filters-info" checked>
+                                <span>Incluir información de filtros aplicados</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="export-preview">
+                        <h3>Vista Previa</h3>
+                        <div class="export-info">
+                            <p><strong>Registros a exportar:</strong> <span id="export-count">-</span></p>
+                            <p><strong>Filtros aplicados:</strong> <span id="export-filters">Ninguno</span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="export-buttons">
+                        <button id="export-execute" class="btn-primary">Exportar</button>
+                        <button id="export-cancel" class="btn-secondary">Cancelar</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -456,6 +455,13 @@
 
         <!-- Contenedor de notificaciones -->
         <div id="notifications-container" class="notifications-container"></div>
+
+        <!-- Contenedor de sugerencias para autocompletado -->
+        <div class="autocomplete-container">
+            <div class="autocomplete-suggestions" id="autocomplete-suggestions">
+                <!-- Las sugerencias aparecerán aquí -->
+            </div>
+        </div>
     </div>
 
     <script src="main.js"></script>
